@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MyGroup } from '../api/groups';
 import { updateMemberGoal, removeMember } from '../api/groups';
 import { GroupAdminPanel } from './GroupAdminPanel';
+import { calculateGoalProgressPercent } from '@shared/progress';
 
 export function MyGroupCard({
   group,
@@ -19,11 +20,18 @@ export function MyGroupCard({
   const [isManaging, setIsManaging] = useState(false);
   const [goalForm, setGoalForm] = useState({
     goalDescription: membership.goalDescription,
+    currentMetricValue: String(membership.currentMetricValue),
     targetMetricValue: String(membership.targetMetricValue),
     metricUnit: membership.metricUnit,
   });
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const progressPercent = calculateGoalProgressPercent(
+    membership.startingMetricValue,
+    membership.targetMetricValue,
+    membership.currentMetricValue,
+  );
 
   async function handleSaveGoal() {
     setIsSaving(true);
@@ -31,6 +39,7 @@ export function MyGroupCard({
     try {
       await updateMemberGoal(group.groupId, currentUserId, {
         goalDescription: goalForm.goalDescription,
+        currentMetricValue: Number(goalForm.currentMetricValue),
         targetMetricValue: Number(goalForm.targetMetricValue),
         metricUnit: goalForm.metricUnit,
       });
@@ -76,8 +85,9 @@ export function MyGroupCard({
 
       {isLocked ? (
         <p className="text-sm text-gray-500">
-          Goal: {membership.goalDescription || 'none set'} ({membership.currentMetricValue} / {membership.targetMetricValue}{' '}
-          {membership.metricUnit})
+          Goal: {membership.goalDescription || 'none set'} ({membership.startingMetricValue} →{' '}
+          {membership.currentMetricValue} / {membership.targetMetricValue} {membership.metricUnit})
+          {progressPercent !== null && <span className="font-semibold"> · {Math.round(progressPercent)}%</span>}
         </p>
       ) : (
         <div className="space-y-2">
@@ -91,18 +101,26 @@ export function MyGroupCard({
             <input
               type="number"
               step="any"
+              placeholder="Starting value"
+              value={goalForm.currentMetricValue}
+              onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+            <input
+              type="number"
+              step="any"
               placeholder="Target value"
               value={goalForm.targetMetricValue}
               onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
-            <input
-              placeholder="Unit (lbs, min, etc)"
-              value={goalForm.metricUnit}
-              onChange={(e) => setGoalForm((p) => ({ ...p, metricUnit: e.target.value }))}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
           </div>
+          <input
+            placeholder="Unit (lbs, min, etc)"
+            value={goalForm.metricUnit}
+            onChange={(e) => setGoalForm((p) => ({ ...p, metricUnit: e.target.value }))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
           <button
             onClick={handleSaveGoal}
             disabled={isSaving}

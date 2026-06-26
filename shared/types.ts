@@ -26,6 +26,7 @@ export interface GroupMembership {
   role: GroupRole;
   joinedAt: string;
   goalDescription: string;
+  startingMetricValue: number;
   targetMetricValue: number;
   currentMetricValue: number;
   metricUnit: string;

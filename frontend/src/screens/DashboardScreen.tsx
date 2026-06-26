@@ -72,7 +72,7 @@ export function DashboardScreen() {
       </div>
 
       <div className="rounded-2xl bg-white p-4 shadow">
-        <h2 className="mb-3 font-bold text-gray-800">Goal progress</h2>
+        <h2 className="mb-3 font-bold text-gray-800">Goal progress (% to goal)</h2>
         <ProgressLineChart progress={progress} />
       </div>
     </div>

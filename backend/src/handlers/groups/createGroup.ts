@@ -47,6 +47,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 role: 'admin',
                 joinedAt: now,
                 goalDescription: '',
+                startingMetricValue: 0,
                 targetMetricValue: 0,
                 currentMetricValue: 0,
                 metricUnit: '',

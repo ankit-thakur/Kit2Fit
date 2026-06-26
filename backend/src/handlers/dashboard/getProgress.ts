@@ -4,6 +4,7 @@ import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { requireMembership } from '../../lib/groups';
 import { json, handleErrors, HttpError } from '../../lib/http';
+import { calculateGoalProgressPercent } from '../../lib/progress';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -39,16 +40,37 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       (Responses?.[Tables.users] ?? []).map((u) => [u.userId, u.nickname]),
     );
 
-    const seriesByUser = new Map<string, { date: string; value: number }[]>();
+    const { Items: members = [] } = await ddb.send(
+      new QueryCommand({
+        TableName: Tables.groupMemberships,
+        KeyConditionExpression: 'groupId = :groupId',
+        ExpressionAttributeValues: { ':groupId': groupId },
+      }),
+    );
+    const membersById = new Map(members.map((m) => [m.userId, m]));
+
+    const seriesByUser = new Map<
+      string,
+      { date: string; percent: number | null; metricValue: number }[]
+    >();
     for (const log of logs) {
+      const member = membersById.get(log.userId);
+      const percent = member
+        ? calculateGoalProgressPercent(
+            member.startingMetricValue ?? 0,
+            member.targetMetricValue ?? 0,
+            log.metricValueAfter,
+          )
+        : null;
       const series = seriesByUser.get(log.userId) ?? [];
-      series.push({ date: log.date, value: log.metricValueAfter });
+      series.push({ date: log.date, percent, metricValue: log.metricValueAfter });
       seriesByUser.set(log.userId, series);
     }
 
     const progress = [...seriesByUser.entries()].map(([uid, series]) => ({
       userId: uid,
       nickname: nicknamesById.get(uid) ?? 'Unknown',
+      metricUnit: membersById.get(uid)?.metricUnit ?? '',
       series,
     }));
 

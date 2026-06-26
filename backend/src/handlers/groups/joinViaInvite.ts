@@ -52,6 +52,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           role: 'member',
           joinedAt: now,
           goalDescription: '',
+          startingMetricValue: 0,
           targetMetricValue: 0,
           currentMetricValue: 0,
           metricUnit: '',

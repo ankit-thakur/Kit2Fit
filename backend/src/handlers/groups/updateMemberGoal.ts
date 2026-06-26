@@ -42,13 +42,27 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw new HttpError(400, 'No editable fields provided');
     }
 
+    const setExpressions = updates.map((f) => `#${f} = :${f}`);
+    const names: Record<string, string> = Object.fromEntries(updates.map((f) => [`#${f}`, f]));
+    const values: Record<string, unknown> = Object.fromEntries(
+      updates.map((f) => [`:${f}`, body[f]]),
+    );
+
+    // currentMetricValue can only be edited before the challenge starts, so each edit
+    // re-baselines startingMetricValue to whatever the user's last pre-challenge value was.
+    if (updates.includes('currentMetricValue')) {
+      setExpressions.push('#startingMetricValue = :startingMetricValue');
+      names['#startingMetricValue'] = 'startingMetricValue';
+      values[':startingMetricValue'] = body.currentMetricValue;
+    }
+
     const { Attributes } = await ddb.send(
       new UpdateCommand({
         TableName: Tables.groupMemberships,
         Key: { groupId, userId: targetUserId },
-        UpdateExpression: `SET ${updates.map((f) => `#${f} = :${f}`).join(', ')}`,
-        ExpressionAttributeNames: Object.fromEntries(updates.map((f) => [`#${f}`, f])),
-        ExpressionAttributeValues: Object.fromEntries(updates.map((f) => [`:${f}`, body[f]])),
+        UpdateExpression: `SET ${setExpressions.join(', ')}`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
         ReturnValues: 'ALL_NEW',
       }),
     );

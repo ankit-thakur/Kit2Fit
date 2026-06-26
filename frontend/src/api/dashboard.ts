@@ -12,12 +12,14 @@ export function getLeaderboard(groupId: string): Promise<{ leaderboard: Leaderbo
 
 export interface ProgressSeriesPoint {
   date: string;
-  value: number;
+  percent: number | null;
+  metricValue: number;
 }
 
 export interface ProgressEntry {
   userId: string;
   nickname: string;
+  metricUnit: string;
   series: ProgressSeriesPoint[];
 }
 
