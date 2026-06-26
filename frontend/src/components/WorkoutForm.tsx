@@ -5,6 +5,7 @@ interface WorkoutFormProps {
   description: string;
   onMinutesChange: (minutes: number) => void;
   onDescriptionChange: (description: string) => void;
+  heading?: string;
 }
 
 export function WorkoutForm({
@@ -12,12 +13,13 @@ export function WorkoutForm({
   description,
   onMinutesChange,
   onDescriptionChange,
+  heading = "Today's workout",
 }: WorkoutFormProps) {
   const previewPoints = calculateDurationPoints(minutesWorkedOut);
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow">
-      <h2 className="mb-3 text-lg font-bold text-gray-800">Today&apos;s workout</h2>
+      <h2 className="mb-3 text-lg font-bold text-gray-800">{heading}</h2>
       <div className="mb-3">
         <label className="mb-1 block text-sm font-medium text-gray-700">Minutes worked out</label>
         <input

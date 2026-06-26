@@ -7,6 +7,7 @@ import { json, handleErrors, HttpError } from '../../lib/http';
 import { calculateDurationPoints, calculateTotalPoints } from '../../lib/points';
 import { judgeGoalContribution } from '../../lib/llmJudge';
 import { matchAdhocChallenge } from '../../lib/adhocMatch';
+import { hasLaterLog } from '../../lib/logs';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -34,7 +35,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const durationPoints = calculateDurationPoints(minutesWorkedOut);
 
-    const [judgeResult, adhocResult] = await Promise.all([
+    const [judgeResult, adhocResult, isBackfill] = await Promise.all([
       judgeGoalContribution({
         workoutDescription: description,
         goalDescription: membership.goalDescription ?? '',
@@ -43,6 +44,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         newMetricValue: metricValueAfter,
       }),
       matchAdhocChallenge(groupId, date, description),
+      hasLaterLog(groupIdUserId, date),
     ]);
 
     const llmBonusPoint = judgeResult.contributes ? 1 : 0;
@@ -74,11 +76,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       new UpdateCommand({
         TableName: Tables.groupMemberships,
         Key: { groupId, userId },
-        UpdateExpression: 'SET currentMetricValue = :metricValueAfter ADD totalPoints :delta',
-        ExpressionAttributeValues: {
-          ':metricValueAfter': metricValueAfter,
-          ':delta': pointsDelta,
-        },
+        UpdateExpression: isBackfill
+          ? 'ADD totalPoints :delta'
+          : 'SET currentMetricValue = :metricValueAfter ADD totalPoints :delta',
+        ExpressionAttributeValues: isBackfill
+          ? { ':delta': pointsDelta }
+          : { ':metricValueAfter': metricValueAfter, ':delta': pointsDelta },
       }),
     );
 

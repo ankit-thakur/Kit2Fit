@@ -5,7 +5,7 @@ process.env.DAILY_LOGS_TABLE = 'DailyLogs';
 process.env.ADHOC_CHALLENGES_TABLE = 'AdhocChallenges';
 
 import { mockClient } from 'aws-sdk-client-mock';
-import { GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { ddb } from '../../src/lib/dynamo';
 
@@ -33,6 +33,7 @@ function buildEvent(body: unknown, groupId = 'group-1', userId = 'user-1'): APIG
 describe('createLog handler', () => {
   beforeEach(() => {
     ddbMock.reset();
+    ddbMock.on(QueryCommand).resolves({ Items: [] });
     (judgeGoalContribution as jest.Mock).mockReset();
     (matchAdhocChallenge as jest.Mock).mockReset();
   });
@@ -99,6 +100,47 @@ describe('createLog handler', () => {
       ':metricValueAfter': 7.5,
       ':points': 4,
     });
+  });
+
+  it('does not overwrite currentMetricValue when backfilling a date before a later log', async () => {
+    ddbMock
+      .on(GetCommand, {
+        TableName: 'GroupMemberships',
+        Key: { groupId: 'group-1', userId: 'user-1' },
+      })
+      .resolves({
+        Item: {
+          groupId: 'group-1',
+          userId: 'user-1',
+          goalDescription: 'Run a faster mile',
+          metricUnit: 'minutes',
+          currentMetricValue: 7,
+          totalPoints: 10,
+        },
+      });
+    ddbMock
+      .on(GetCommand, { TableName: 'DailyLogs', Key: { groupIdUserId: 'group-1#user-1', date: '2026-06-01' } })
+      .resolves({ Item: undefined });
+    ddbMock.on(QueryCommand).resolves({ Items: [{ date: '2026-06-03' }] });
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(UpdateCommand).resolves({});
+
+    (judgeGoalContribution as jest.Mock).mockResolvedValue({ contributes: false, reason: 'Not related.' });
+    (matchAdhocChallenge as jest.Mock).mockResolvedValue({ matched: false });
+
+    const event = buildEvent({
+      date: '2026-06-01',
+      minutesWorkedOut: 30,
+      description: 'Backfilled jog',
+      metricValueAfter: 7.9,
+    });
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(201);
+
+    const updateCall = ddbMock.commandCalls(UpdateCommand)[0].args[0].input;
+    expect(updateCall.UpdateExpression).toBe('ADD totalPoints :points');
+    expect(updateCall.ExpressionAttributeValues).toEqual({ ':points': 2 });
   });
 
   it('rejects a duplicate log for the same date', async () => {
