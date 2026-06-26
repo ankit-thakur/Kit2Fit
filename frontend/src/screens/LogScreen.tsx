@@ -11,12 +11,12 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function lastNDays(n: number): string[] {
+function weekDatesForOffset(offsetWeeks: number): string[] {
   const days: string[] = [];
   const now = new Date();
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = 6; i >= 0; i--) {
     const d = new Date(now);
-    d.setDate(d.getDate() - i);
+    d.setDate(d.getDate() - i - offsetWeeks * 7);
     days.push(d.toISOString().slice(0, 10));
   }
   return days;
@@ -29,12 +29,14 @@ function parseMetricValue(raw: string | undefined): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-const WEEK_DATES = lastNDays(7);
-
 export function LogScreen() {
   const [groups, setGroups] = useState<MyGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [weekOffset, setWeekOffset] = useState(0);
+  const weekDates = useMemo(() => weekDatesForOffset(weekOffset), [weekOffset]);
+  const [isWeekLoading, setIsWeekLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(today());
   const [logsByGroup, setLogsByGroup] = useState<Record<string, Record<string, DailyLog>>>({});
@@ -47,22 +49,38 @@ export function LogScreen() {
 
   useEffect(() => {
     listMyGroups()
-      .then(async ({ groups: myGroups }) => {
-        setGroups(myGroups);
-        const entries = await Promise.all(
-          myGroups.map(async (g) => {
-            const { logs } = await listMyLogs(g.groupId, {
-              from: WEEK_DATES[0],
-              to: WEEK_DATES[WEEK_DATES.length - 1],
-            });
-            return [g.groupId, Object.fromEntries(logs.map((log) => [log.date, log]))] as const;
-          }),
-        );
-        setLogsByGroup(Object.fromEntries(entries));
-      })
+      .then(({ groups: myGroups }) => setGroups(myGroups))
       .catch((err) => setLoadError(err instanceof Error ? err.message : 'Failed to load groups'))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (groups.length === 0) return;
+    setIsWeekLoading(true);
+    Promise.all(
+      groups.map(async (g) => {
+        const { logs } = await listMyLogs(g.groupId, {
+          from: weekDates[0],
+          to: weekDates[weekDates.length - 1],
+        });
+        return [g.groupId, logs] as const;
+      }),
+    )
+      .then((entries) => {
+        setLogsByGroup((prev) => {
+          const next = { ...prev };
+          for (const [groupId, logs] of entries) {
+            next[groupId] = {
+              ...next[groupId],
+              ...Object.fromEntries(logs.map((log) => [log.date, log])),
+            };
+          }
+          return next;
+        });
+      })
+      .catch((err) => setLoadError(err instanceof Error ? err.message : 'Failed to load logs'))
+      .finally(() => setIsWeekLoading(false));
+  }, [groups, weekDates]);
 
   useEffect(() => {
     if (groups.length === 0) return;
@@ -85,7 +103,7 @@ export function LogScreen() {
 
   const statusByDate = useMemo(() => {
     const status: Record<string, DayStatus> = {};
-    for (const date of WEEK_DATES) {
+    for (const date of weekDates) {
       if (groups.length === 0) {
         status[date] = 'none';
         continue;
@@ -94,7 +112,13 @@ export function LogScreen() {
       status[date] = loggedCount === 0 ? 'none' : loggedCount === groups.length ? 'full' : 'partial';
     }
     return status;
-  }, [groups, logsByGroup]);
+  }, [groups, logsByGroup, weekDates]);
+
+  function goToWeek(offset: number) {
+    const dates = weekDatesForOffset(offset);
+    setWeekOffset(offset);
+    setSelectedDate(dates[dates.length - 1]);
+  }
 
   async function handleSubmit() {
     setIsSubmitting(true);
@@ -176,10 +200,15 @@ export function LogScreen() {
       <h1 className="text-2xl font-extrabold text-kit-dark">Log workout</h1>
 
       <WeekStrip
-        dates={WEEK_DATES}
+        dates={weekDates}
         selectedDate={selectedDate}
         onSelect={setSelectedDate}
         statusByDate={statusByDate}
+        onPrevWeek={() => goToWeek(weekOffset + 1)}
+        onNextWeek={() => goToWeek(Math.max(0, weekOffset - 1))}
+        canGoNext={weekOffset > 0}
+        isCurrentWeek={weekOffset === 0}
+        isLoading={isWeekLoading}
       />
 
       <WorkoutForm
