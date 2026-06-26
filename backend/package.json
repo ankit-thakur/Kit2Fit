@@ -1,0 +1,33 @@
+{
+  "name": "kit2fit-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit",
+    "synth": "cdk synth",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.138",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.7",
+    "aws-cdk": "^2.140.0",
+    "aws-sdk-client-mock": "^4.0.0",
+    "esbuild": "^0.20.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.9",
+    "@aws-sdk/client-dynamodb": "^3.550.0",
+    "@aws-sdk/client-s3": "^3.550.0",
+    "@aws-sdk/client-secrets-manager": "^3.550.0",
+    "@aws-sdk/lib-dynamodb": "^3.550.0",
+    "@aws-sdk/s3-request-presigner": "^3.550.0",
+    "aws-cdk-lib": "^2.140.0",
+    "constructs": "^10.3.0",
+    "source-map-support": "^0.5.21"
+  }
+}
