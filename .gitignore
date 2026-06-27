@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.*
+!.env.example
+
+# CDK
+backend/cdk.out/
+backend/.cdk.staging/
+
+# Frontend
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Editor
+.DS_Store
+.vscode/
