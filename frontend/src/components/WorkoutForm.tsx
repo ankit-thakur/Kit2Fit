@@ -27,7 +27,7 @@ export function WorkoutForm({
           min={0}
           value={minutesWorkedOut}
           onChange={(e) => onMinutesChange(Number(e.target.value))}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-coral focus:outline-none"
         />
       </div>
       <div className="mb-3">
@@ -37,12 +37,12 @@ export function WorkoutForm({
           onChange={(e) => onDescriptionChange(e.target.value)}
           rows={3}
           placeholder="e.g. 30 min jog (or a brisk walk you're calling a jog)"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-coral focus:outline-none"
         />
       </div>
-      <div className="flex items-center justify-between rounded-lg bg-orange-pale px-3 py-2">
+      <div className="flex items-center justify-between rounded-lg bg-teal-pale px-3 py-2">
         <span className="text-sm text-gray-600">Duration points (live preview)</span>
-        <span className="text-lg font-bold text-orange-dark">{previewPoints}</span>
+        <span className="text-lg font-bold text-teal-dark">{previewPoints}</span>
       </div>
       <p className="mt-2 text-xs text-gray-400">
         Bonus points land after you hit submit. We're thorough, not psychic.

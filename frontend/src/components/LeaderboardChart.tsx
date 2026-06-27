@@ -13,7 +13,7 @@ export function LeaderboardChart({ leaderboard }: { leaderboard: LeaderboardEntr
         <XAxis type="number" allowDecimals={false} />
         <YAxis type="category" dataKey="nickname" width={90} />
         <Tooltip />
-        <Bar dataKey="totalPoints" fill="#F58426" radius={[0, 6, 6, 0]} />
+        <Bar dataKey="totalPoints" fill="#0E7C7B" radius={[0, 6, 6, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

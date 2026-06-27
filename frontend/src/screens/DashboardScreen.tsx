@@ -79,7 +79,7 @@ export function DashboardScreen() {
   if (groups.length === 0) {
     return (
       <div className="mx-auto max-w-lg p-4">
-        <h1 className="mb-1 font-display text-2xl font-bold text-navy">Dashboard</h1>
+        <h1 className="mb-1 font-display text-2xl font-bold text-ink">Dashboard</h1>
         <p className="mb-4 text-sm text-gray-500">Where excuses come to die.</p>
         <p className="rounded-2xl bg-white p-4 text-center text-gray-400 shadow">
           No groups, no dashboard. We don't make the rules — okay, we do. Go join one from the Profile tab.
@@ -91,7 +91,7 @@ export function DashboardScreen() {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div>
-        <h1 className="font-display text-2xl font-bold text-navy">Dashboard</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
         <p className="text-sm text-gray-500">Where excuses come to die.</p>
       </div>
 

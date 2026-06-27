@@ -23,7 +23,7 @@ export function GroupDashboardWidget({ group }: { group: MyGroup }) {
 
   return (
     <div className="space-y-4 rounded-2xl bg-white p-4 shadow">
-      <h2 className="font-display font-bold text-navy">{group.name}</h2>
+      <h2 className="font-display font-bold text-ink">{group.name}</h2>
 
       {error && <p className="text-center text-red-500">{error}</p>}
       {isLoading ? (

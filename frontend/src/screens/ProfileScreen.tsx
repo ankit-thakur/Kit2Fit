@@ -58,7 +58,7 @@ export function ProfileScreen() {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-navy">Profile</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Profile</h1>
         <button onClick={signOut} className="text-sm text-gray-400">
           Sign out
         </button>
@@ -100,7 +100,7 @@ export function ProfileScreen() {
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="flex-1 rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark disabled:opacity-50"
                 >
                   {isSaving ? 'Saving...' : 'Save'}
                 </button>
@@ -112,7 +112,7 @@ export function ProfileScreen() {
               <p className="text-sm text-gray-500">{me.name}</p>
               <p className="text-sm text-gray-400">{me.email}</p>
               <p className="text-sm text-gray-400">{me.phoneNumber}</p>
-              <button onClick={() => setIsEditing(true)} className="mt-2 text-sm font-semibold text-navy">
+              <button onClick={() => setIsEditing(true)} className="mt-2 text-sm font-semibold text-ink">
                 Edit profile
               </button>
             </div>

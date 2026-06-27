@@ -162,7 +162,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
               />
             </div>
-            <button type="submit" className="w-full rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark">
+            <button type="submit" className="w-full rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark">
               Save settings
             </button>
           </form>
@@ -190,7 +190,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 onChange={(e) => setMemberEmail(e.target.value)}
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
               />
-              <button type="submit" className="rounded-lg bg-orange px-3 py-2 font-semibold text-white hover:bg-orange-dark">
+              <button type="submit" className="rounded-lg bg-teal px-3 py-2 font-semibold text-white hover:bg-teal-dark">
                 Add
               </button>
             </form>
@@ -200,7 +200,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
             <h4 className="text-sm font-semibold text-gray-600">Invite link (share responsibly)</h4>
             <button
               onClick={handleGenerateInvite}
-              className="w-full rounded-lg border border-blue py-2 font-semibold text-blue"
+              className="w-full rounded-lg border border-coral py-2 font-semibold text-coral"
             >
               Generate invite link
             </button>
@@ -248,7 +248,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 onChange={(e) => setChallengeForm((p) => ({ ...p, activeDate: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
-              <button type="submit" className="w-full rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark">
+              <button type="submit" className="w-full rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark">
                 Add challenge
               </button>
             </form>

@@ -36,7 +36,7 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full rounded-lg border-2 border-dashed border-orange py-3 font-semibold text-orange-dark"
+        className="w-full rounded-lg border-2 border-dashed border-teal py-3 font-semibold text-teal-dark"
       >
         + Create a new group
       </button>
@@ -95,7 +95,7 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark disabled:opacity-50"
+          className="flex-1 rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark disabled:opacity-50"
         >
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>

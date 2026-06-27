@@ -11,20 +11,22 @@
 />
 <style>
   :root {
-    --navy: #0C2340;
-    --navy-light: #1F3A63;
-    --navy-dark: #071630;
-    --blue: #006BB6;
-    --blue-light: #3FA9F5;
-    --blue-pale: #E3F2FC;
-    --orange: #F58426;
-    --orange-dark: #D4691A;
-    --orange-light: #FBC692;
-    --orange-pale: #FDEBD8;
-    --cream: #FAF6EC;
-    --cream-dark: #F1E9D8;
-    --charcoal: #1A1A1E;
-    --charcoal-light: #54545B;
+    --ink: #14213D;
+    --ink-light: #24345C;
+    --ink-dark: #0A1426;
+    --coral: #F6635C;
+    --coral-dark: #D94840;
+    --coral-light: #FA9890;
+    --coral-pale: #FDE9E7;
+    --teal: #0E7C7B;
+    --teal-dark: #0A5F5E;
+    --teal-light: #3FA39B;
+    --teal-pale: #E1F3F1;
+    --seafoam: #6FD6C8;
+    --cream: #F7F3E8;
+    --cream-dark: #ECE1C9;
+    --charcoal: #262629;
+    --charcoal-light: #5B5B63;
   }
   * { box-sizing: border-box; }
   body {
@@ -43,7 +45,7 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--orange-dark);
+    color: var(--coral-dark);
     margin: 0 0 8px;
   }
   h1.brand-title {
@@ -51,7 +53,7 @@
     font-weight: 700;
     font-size: 44px;
     margin: 0 0 4px;
-    color: var(--navy);
+    color: var(--ink);
   }
   .subtitle {
     font-size: 16px;
@@ -65,7 +67,7 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     font-size: 22px;
-    color: var(--navy);
+    color: var(--ink);
     border-bottom: 2px solid var(--cream-dark);
     padding-bottom: 10px;
     margin-bottom: 24px;
@@ -88,30 +90,29 @@
     min-height: 160px;
   }
   .logo-card.on-cream { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .logo-card.on-navy { background: var(--navy); }
-  .logo-card.on-orange { background: var(--orange); }
+  .logo-card.on-ink { background: var(--ink); }
+  .logo-card.on-teal { background: var(--teal); }
   .wordmark {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 36px;
     letter-spacing: -0.01em;
   }
-  .wordmark .accent { color: var(--orange); }
+  .wordmark .accent { color: var(--coral); }
   .wordmark.inverse { color: var(--cream); }
-  .wordmark.inverse .accent { color: var(--orange-light); }
-  .wordmark.on-orange-text { color: var(--navy); }
+  .wordmark.inverse .accent { color: var(--seafoam); }
   .lockup-caption {
     font-size: 12px;
     color: var(--charcoal-light);
   }
-  .lockup-caption.inverse { color: rgba(250,246,236,0.7); }
+  .lockup-caption.inverse { color: rgba(247,243,232,0.7); }
 
   .badge {
     width: 92px;
     height: 92px;
     border-radius: 50%;
-    background: var(--navy);
-    border: 3px solid var(--orange);
+    background: var(--ink);
+    border: 3px solid var(--coral);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -191,7 +192,7 @@
   }
   .voice-sample h3 {
     font-family: 'Space Grotesk', sans-serif;
-    color: var(--navy);
+    color: var(--ink);
     margin: 0 0 4px;
     font-size: 20px;
   }
@@ -205,34 +206,34 @@
 </head>
 <body>
   <div class="sheet">
-    <p class="eyebrow">Brand Guide · v1</p>
+    <p class="eyebrow">Brand Guide · v2</p>
     <h1 class="brand-title">Kit2Fit</h1>
-    <p class="subtitle">Friendly competition. Emphasis on competition. Knicks-coded, gym-class energy.</p>
+    <p class="subtitle">Friendly competition. Emphasis on competition. Tidepool-coded, beach-day energy.</p>
 
     <section>
       <h2 class="section-title">Logo lockups</h2>
       <div class="logo-grid">
         <div class="logo-card on-cream">
           <span class="wordmark">Kit<span class="accent">2</span>Fit</span>
-          <span class="lockup-caption">Primary wordmark — navy on cream/white</span>
+          <span class="lockup-caption">Primary wordmark — ink on cream/white</span>
         </div>
-        <div class="logo-card on-navy">
+        <div class="logo-card on-ink">
           <span class="wordmark inverse">Kit<span class="accent">2</span>Fit</span>
-          <span class="lockup-caption inverse">Inverse wordmark — for navy backgrounds</span>
+          <span class="lockup-caption inverse">Inverse wordmark — for ink backgrounds</span>
         </div>
         <div class="logo-card on-cream">
           <div class="badge">K2F</div>
           <span class="lockup-caption">Monogram badge — app icon / favicon</span>
         </div>
-        <div class="logo-card on-orange">
+        <div class="logo-card on-teal">
           <svg class="icon-mark" viewBox="0 0 64 64" fill="none">
-            <rect x="4" y="26" width="10" height="12" rx="2" fill="#0C2340"/>
-            <rect x="50" y="26" width="10" height="12" rx="2" fill="#0C2340"/>
-            <rect x="14" y="30" width="4" height="4" fill="#0C2340"/>
-            <rect x="46" y="30" width="4" height="4" fill="#0C2340"/>
-            <rect x="18" y="29" width="28" height="6" rx="3" fill="#FAF6EC"/>
+            <rect x="4" y="26" width="10" height="12" rx="2" fill="#14213D"/>
+            <rect x="50" y="26" width="10" height="12" rx="2" fill="#14213D"/>
+            <rect x="14" y="30" width="4" height="4" fill="#14213D"/>
+            <rect x="46" y="30" width="4" height="4" fill="#14213D"/>
+            <rect x="18" y="29" width="28" height="6" rx="3" fill="#F7F3E8"/>
           </svg>
-          <span class="lockup-caption">Icon mark — dumbbell glyph, app tiles</span>
+          <span class="lockup-caption inverse">Icon mark — dumbbell glyph, app tiles</span>
         </div>
       </div>
     </section>
@@ -241,66 +242,74 @@
       <h2 class="section-title">Color palette</h2>
       <div class="color-grid">
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--navy);"></div>
+          <div class="swatch-color" style="background: var(--ink);"></div>
           <div class="swatch-label">
-            <p class="swatch-name">Navy</p>
-            <p class="swatch-hex">#0C2340</p>
+            <p class="swatch-name">Deep Ink</p>
+            <p class="swatch-hex">#14213D</p>
             <p class="swatch-role">Headlines, nav bar</p>
           </div>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--blue);"></div>
+          <div class="swatch-color" style="background: var(--teal);"></div>
           <div class="swatch-label">
-            <p class="swatch-name">Knicks Blue</p>
-            <p class="swatch-hex">#006BB6</p>
-            <p class="swatch-role">Links, secondary actions</p>
-          </div>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--blue-light);"></div>
-          <div class="swatch-label">
-            <p class="swatch-name">Bright Blue</p>
-            <p class="swatch-hex">#3FA9F5</p>
-            <p class="swatch-role">Focus rings, highlights</p>
-          </div>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--blue-pale);"></div>
-          <div class="swatch-label">
-            <p class="swatch-name">Pale Blue</p>
-            <p class="swatch-hex">#E3F2FC</p>
-            <p class="swatch-role">Tinted surfaces</p>
-          </div>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--orange);"></div>
-          <div class="swatch-label">
-            <p class="swatch-name">Knicks Orange</p>
-            <p class="swatch-hex">#F58426</p>
+            <p class="swatch-name">Deep Teal</p>
+            <p class="swatch-hex">#0E7C7B</p>
             <p class="swatch-role">Primary buttons, CTAs</p>
           </div>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--orange-dark);"></div>
+          <div class="swatch-color" style="background: var(--teal-dark);"></div>
           <div class="swatch-label">
-            <p class="swatch-name">Burnt Orange</p>
-            <p class="swatch-hex">#D4691A</p>
+            <p class="swatch-name">Deep Teal (dark)</p>
+            <p class="swatch-hex">#0A5F5E</p>
             <p class="swatch-role">Button hover/active</p>
           </div>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--orange-pale);"></div>
+          <div class="swatch-color" style="background: var(--teal-pale);"></div>
           <div class="swatch-label">
-            <p class="swatch-name">Pale Orange</p>
-            <p class="swatch-hex">#FDEBD8</p>
+            <p class="swatch-name">Pale Teal</p>
+            <p class="swatch-hex">#E1F3F1</p>
             <p class="swatch-role">Tinted surfaces, points panel</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--coral);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Coral Pink</p>
+            <p class="swatch-hex">#F6635C</p>
+            <p class="swatch-role">Links, secondary actions, focus rings</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--coral-light);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Light Coral</p>
+            <p class="swatch-hex">#FA9890</p>
+            <p class="swatch-role">Dots, secondary highlights</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--coral-pale);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Pale Coral</p>
+            <p class="swatch-hex">#FDE9E7</p>
+            <p class="swatch-role">Tinted surfaces</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--seafoam);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Seafoam</p>
+            <p class="swatch-hex">#6FD6C8</p>
+            <p class="swatch-role">Chart accents, highlights</p>
           </div>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--cream); border-bottom: 1px solid #eee;"></div>
           <div class="swatch-label">
-            <p class="swatch-name">Cream</p>
-            <p class="swatch-hex">#FAF6EC</p>
+            <p class="swatch-name">Sandy Cream</p>
+            <p class="swatch-hex">#F7F3E8</p>
             <p class="swatch-role">App background</p>
           </div>
         </div>
@@ -308,7 +317,7 @@
           <div class="swatch-color" style="background: var(--cream-dark);"></div>
           <div class="swatch-label">
             <p class="swatch-name">Eggshell</p>
-            <p class="swatch-hex">#F1E9D8</p>
+            <p class="swatch-hex">#ECE1C9</p>
             <p class="swatch-role">Card dividers, subtle bg</p>
           </div>
         </div>
@@ -316,7 +325,7 @@
           <div class="swatch-color" style="background: var(--charcoal);"></div>
           <div class="swatch-label">
             <p class="swatch-name">Charcoal</p>
-            <p class="swatch-hex">#1A1A1E</p>
+            <p class="swatch-hex">#262629</p>
             <p class="swatch-role">Body text</p>
           </div>
         </div>
@@ -324,16 +333,8 @@
           <div class="swatch-color" style="background: var(--charcoal-light);"></div>
           <div class="swatch-label">
             <p class="swatch-name">Slate Grey</p>
-            <p class="swatch-hex">#54545B</p>
+            <p class="swatch-hex">#5B5B63</p>
             <p class="swatch-role">Secondary text</p>
-          </div>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: #fff; border-bottom: 1px solid #eee;"></div>
-          <div class="swatch-label">
-            <p class="swatch-name">White</p>
-            <p class="swatch-hex">#FFFFFF</p>
-            <p class="swatch-role">Card surfaces</p>
           </div>
         </div>
       </div>

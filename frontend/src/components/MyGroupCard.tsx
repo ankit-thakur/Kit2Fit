@@ -64,14 +64,14 @@ export function MyGroupCard({
     <div className="space-y-3 rounded-2xl bg-white p-4 shadow">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-display font-bold text-navy">{group.name}</h3>
+          <h3 className="font-display font-bold text-ink">{group.name}</h3>
           <p className="text-xs text-gray-400">
             {group.goalCategory} · {group.challengeStartDate.slice(0, 10)} → {group.challengeEndDate.slice(0, 10)}
           </p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
-            <button onClick={() => setIsManaging((v) => !v)} className="text-xs font-semibold text-blue">
+            <button onClick={() => setIsManaging((v) => !v)} className="text-xs font-semibold text-coral">
               {isManaging ? 'Hide' : 'Manage'}
             </button>
           )}
@@ -124,7 +124,7 @@ export function MyGroupCard({
           <button
             onClick={handleSaveGoal}
             disabled={isSaving}
-            className="w-full rounded-lg bg-orange-pale py-2 text-sm font-semibold text-orange-dark disabled:opacity-50"
+            className="w-full rounded-lg bg-teal-pale py-2 text-sm font-semibold text-teal-dark disabled:opacity-50"
           >
             {isSaving ? 'Saving...' : 'Save goal'}
           </button>

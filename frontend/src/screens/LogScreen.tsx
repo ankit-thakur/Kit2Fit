@@ -198,7 +198,7 @@ export function LogScreen() {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div>
-        <h1 className="font-display text-2xl font-bold text-navy">Log workout</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Log workout</h1>
         <p className="text-sm text-gray-500">Confess your cardio.</p>
       </div>
 
@@ -245,7 +245,7 @@ export function LogScreen() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-orange py-3 font-semibold text-white transition hover:bg-orange-dark disabled:opacity-50"
+          className="w-full rounded-lg bg-teal py-3 font-semibold text-white transition hover:bg-teal-dark disabled:opacity-50"
         >
           {isSubmitting ? 'Locking it in...' : `${hasAnyExistingLog ? 'Update' : 'Log'} this workout`}
         </button>

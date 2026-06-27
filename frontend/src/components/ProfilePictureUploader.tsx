@@ -32,7 +32,7 @@ export function ProfilePictureUploader({ profilePictureUrl, onUploaded }: Profil
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="h-24 w-24 overflow-hidden rounded-full border-2 border-blue bg-blue-pale"
+        className="h-24 w-24 overflow-hidden rounded-full border-2 border-coral bg-coral-pale"
       >
         {profilePictureUrl ? (
           <img src={profilePictureUrl} alt="Profile" className="h-full w-full object-cover" />

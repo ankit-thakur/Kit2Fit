@@ -32,12 +32,12 @@ export function JoinScreen() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6 text-center">
-      <h1 className="mb-2 font-display text-2xl font-bold text-navy">Kit2Fit</h1>
+      <h1 className="mb-2 font-display text-2xl font-bold text-ink">Kit2Fit</h1>
       <p className="mb-6 text-gray-600">{status === 'joining' ? 'Hold on, sneaking you in...' : message}</p>
       {status !== 'joining' && (
         <button
           onClick={() => navigate('/')}
-          className="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark"
+          className="rounded-lg bg-teal px-4 py-2 font-semibold text-white hover:bg-teal-dark"
         >
           Go to dashboard
         </button>
