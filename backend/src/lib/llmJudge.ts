@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
 export interface GoalContributionInput {
   workoutDescription: string;
@@ -13,12 +13,12 @@ export interface GoalContributionResult {
   reason: string;
 }
 
-const MODEL = 'claude-haiku-4-5';
+const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'us.anthropic.claude-haiku-4-5-20251001-v1:0';
 
-let client: Anthropic | undefined;
-function getClient(): Anthropic {
+let client: BedrockRuntimeClient | undefined;
+function getClient(): BedrockRuntimeClient {
   if (!client) {
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    client = new BedrockRuntimeClient({});
   }
   return client;
 }
@@ -39,13 +39,21 @@ export async function judgeGoalContribution(
   input: GoalContributionInput,
 ): Promise<GoalContributionResult> {
   try {
-    const response = await getClient().messages.create({
-      model: MODEL,
-      max_tokens: 200,
-      messages: [{ role: 'user', content: buildPrompt(input) }],
+    const command = new InvokeModelCommand({
+      modelId: MODEL_ID,
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: buildPrompt(input) }],
+      }),
     });
 
-    const textBlock = response.content.find((block) => block.type === 'text');
+    const response = await getClient().send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+
+    const textBlock = responseBody.content?.find((block: { type: string }) => block.type === 'text');
     if (!textBlock || textBlock.type !== 'text') {
       throw new Error('No text content in LLM response');
     }
