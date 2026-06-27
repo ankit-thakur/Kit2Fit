@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { getMe, updateMe, type Me } from '../api/users';
+import { getMe, updateMe, getMyProgress, type Me, type MyGoalProgress } from '../api/users';
 import { listMyGroups, type MyGroup } from '../api/groups';
 import { ProfilePictureUploader } from '../components/ProfilePictureUploader';
 import { CreateGroupForm } from '../components/CreateGroupForm';
 import { MyGroupCard } from '../components/MyGroupCard';
+import { MyGoalsProgressChart } from '../components/MyGoalsProgressChart';
 import { useAuth } from '../auth/AuthContext';
 
 export function ProfileScreen() {
   const { signOut } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   const [groups, setGroups] = useState<MyGroup[]>([]);
+  const [goals, setGoals] = useState<MyGoalProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -20,9 +22,10 @@ export function ProfileScreen() {
     setIsLoading(true);
     setError(null);
     try {
-      const [meRes, groupsRes] = await Promise.all([getMe(), listMyGroups()]);
+      const [meRes, groupsRes, progressRes] = await Promise.all([getMe(), listMyGroups(), getMyProgress()]);
       setMe(meRes);
       setGroups(groupsRes.groups);
+      setGoals(progressRes.goals);
       setEditForm({ name: meRes.name, nickname: meRes.nickname, phoneNumber: meRes.phoneNumber });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -114,6 +117,13 @@ export function ProfileScreen() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {groups.length > 0 && (
+        <div className="rounded-2xl bg-white p-4 shadow">
+          <h2 className="mb-3 font-bold text-gray-800">Goal progress (% to goal)</h2>
+          <MyGoalsProgressChart goals={goals} />
         </div>
       )}
 

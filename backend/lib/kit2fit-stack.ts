@@ -170,6 +170,11 @@ export class Kit2FitStack extends cdk.Stack {
     );
     profilePicturesBucket.grantPut(getProfilePictureUploadUrlFn);
 
+    const getMyProgressFn = mkFn('GetMyProgressFn', 'src/handlers/users/getMyProgress.ts');
+    this.groupMembershipsTable.grantReadData(getMyProgressFn);
+    this.groupsTable.grantReadData(getMyProgressFn);
+    this.dailyLogsTable.grantReadData(getMyProgressFn);
+
     // --- Groups domain ---
     const createGroupFn = mkFn('CreateGroupFn', 'src/handlers/groups/createGroup.ts');
     this.groupsTable.grantWriteData(createGroupFn);
@@ -286,6 +291,7 @@ export class Kit2FitStack extends cdk.Stack {
     const me = users.addResource('me');
     me.addMethod('GET', new apigateway.LambdaIntegration(getMeFn), withAuth);
     me.addMethod('PUT', new apigateway.LambdaIntegration(updateMeFn), withAuth);
+    me.addResource('progress').addMethod('GET', new apigateway.LambdaIntegration(getMyProgressFn), withAuth);
     me.addResource('profile-picture-upload-url').addMethod(
       'POST',
       new apigateway.LambdaIntegration(getProfilePictureUploadUrlFn),

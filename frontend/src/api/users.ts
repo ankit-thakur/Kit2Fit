@@ -15,6 +15,18 @@ export function getProfilePictureUploadUrl(): Promise<{ uploadUrl: string; key: 
   return apiRequest('POST', '/users/me/profile-picture-upload-url');
 }
 
+export interface MyGoalProgress {
+  groupId: string;
+  groupName: string;
+  goalDescription: string;
+  metricUnit: string;
+  series: { date: string; percent: number | null; metricValue: number }[];
+}
+
+export function getMyProgress(): Promise<{ goals: MyGoalProgress[] }> {
+  return apiRequest('GET', '/users/me/progress');
+}
+
 export async function uploadProfilePicture(file: File): Promise<string> {
   const { uploadUrl, key } = await getProfilePictureUploadUrl();
   const response = await fetch(uploadUrl, {
