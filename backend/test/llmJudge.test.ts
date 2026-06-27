@@ -1,12 +1,19 @@
-const mockCreate = jest.fn();
+const mockSend = jest.fn();
 
-jest.mock('@anthropic-ai/sdk', () => {
-  return jest.fn().mockImplementation(() => ({
-    messages: { create: mockCreate },
-  }));
+jest.mock('@aws-sdk/client-bedrock-runtime', () => {
+  return {
+    BedrockRuntimeClient: jest.fn().mockImplementation(() => ({
+      send: mockSend,
+    })),
+    InvokeModelCommand: jest.fn().mockImplementation((input) => input),
+  };
 });
 
 import { judgeGoalContribution, parseJudgeResponse } from '../src/lib/llmJudge';
+
+function bedrockResponse(content: unknown) {
+  return { body: new TextEncoder().encode(JSON.stringify({ content })) };
+}
 
 describe('parseJudgeResponse', () => {
   it('parses a well-formed JSON response', () => {
@@ -40,7 +47,7 @@ describe('parseJudgeResponse', () => {
 
 describe('judgeGoalContribution', () => {
   beforeEach(() => {
-    mockCreate.mockReset();
+    mockSend.mockReset();
   });
 
   const input = {
@@ -52,16 +59,16 @@ describe('judgeGoalContribution', () => {
   };
 
   it('returns the parsed result on a successful API call', async () => {
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: '{"contributes": true, "reason": "Direct sprint work."}' }],
-    });
+    mockSend.mockResolvedValue(
+      bedrockResponse([{ type: 'text', text: '{"contributes": true, "reason": "Direct sprint work."}' }]),
+    );
 
     const result = await judgeGoalContribution(input);
     expect(result).toEqual({ contributes: true, reason: 'Direct sprint work.' });
   });
 
   it('falls back to contributes: false when the API call throws', async () => {
-    mockCreate.mockRejectedValue(new Error('network error'));
+    mockSend.mockRejectedValue(new Error('network error'));
 
     const result = await judgeGoalContribution(input);
     expect(result).toEqual({
@@ -71,7 +78,7 @@ describe('judgeGoalContribution', () => {
   });
 
   it('falls back to contributes: false when the response has no text block', async () => {
-    mockCreate.mockResolvedValue({ content: [] });
+    mockSend.mockResolvedValue(bedrockResponse([]));
 
     const result = await judgeGoalContribution(input);
     expect(result).toEqual({
