@@ -162,7 +162,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
               />
             </div>
-            <button type="submit" className="w-full rounded-lg bg-kit py-2 font-semibold text-white hover:bg-kit-dark">
+            <button type="submit" className="w-full rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark">
               Save settings
             </button>
           </form>
@@ -190,27 +190,32 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 onChange={(e) => setMemberEmail(e.target.value)}
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
               />
-              <button type="submit" className="rounded-lg bg-kit px-3 py-2 font-semibold text-white hover:bg-kit-dark">
+              <button type="submit" className="rounded-lg bg-orange px-3 py-2 font-semibold text-white hover:bg-orange-dark">
                 Add
               </button>
             </form>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-600">Invite link</h4>
+            <h4 className="text-sm font-semibold text-gray-600">Invite link (share responsibly)</h4>
             <button
               onClick={handleGenerateInvite}
-              className="w-full rounded-lg border border-kit py-2 font-semibold text-kit-dark"
+              className="w-full rounded-lg border border-blue py-2 font-semibold text-blue"
             >
               Generate invite link
             </button>
             {inviteUrl && (
-              <p className="break-all rounded-lg bg-gray-50 p-2 text-xs text-gray-600">{inviteUrl}</p>
+              <>
+                <p className="break-all rounded-lg bg-gray-50 p-2 text-xs text-gray-600">{inviteUrl}</p>
+                <p className="text-xs text-gray-400">
+                  Expires in 7 days. Don't be the one who waits 8.
+                </p>
+              </>
             )}
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-600">Ad-hoc challenges</h4>
+            <h4 className="text-sm font-semibold text-gray-600">Surprise challenges (organized chaos)</h4>
             {challenges.map((challenge) => (
               <div key={challenge.challengeId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
                 <span className="text-sm text-gray-700">
@@ -224,7 +229,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
             <form onSubmit={handleCreateChallenge} className="space-y-2">
               <input
                 required
-                placeholder="Description (e.g. Jump rope day)"
+                placeholder="Description (e.g. Burpee Tuesday)"
                 value={challengeForm.description}
                 onChange={(e) => setChallengeForm((p) => ({ ...p, description: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -243,7 +248,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 onChange={(e) => setChallengeForm((p) => ({ ...p, activeDate: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
-              <button type="submit" className="w-full rounded-lg bg-kit py-2 font-semibold text-white hover:bg-kit-dark">
+              <button type="submit" className="w-full rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark">
                 Add challenge
               </button>
             </form>

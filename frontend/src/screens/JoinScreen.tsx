@@ -12,13 +12,17 @@ export function JoinScreen() {
     const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
-      setMessage('Missing invite token.');
+      setMessage("That invite link is broken or missing. Ask whoever sent it to try again.");
       return;
     }
     joinViaInvite(token)
       .then(({ alreadyMember }) => {
         setStatus('done');
-        setMessage(alreadyMember ? 'You are already in this group!' : 'You joined the group!');
+        setMessage(
+          alreadyMember
+            ? "Relax, you're already in. Overachiever."
+            : "Welcome aboard. Bring your competitive side — it's required.",
+        );
       })
       .catch((err) => {
         setStatus('error');
@@ -27,13 +31,13 @@ export function JoinScreen() {
   }, [searchParams]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-kit-light px-6 text-center">
-      <h1 className="mb-2 text-2xl font-extrabold text-kit-dark">Kit2Fit</h1>
-      <p className="mb-6 text-gray-600">{status === 'joining' ? 'Joining group...' : message}</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6 text-center">
+      <h1 className="mb-2 font-display text-2xl font-bold text-navy">Kit2Fit</h1>
+      <p className="mb-6 text-gray-600">{status === 'joining' ? 'Hold on, sneaking you in...' : message}</p>
       {status !== 'joining' && (
         <button
           onClick={() => navigate('/')}
-          className="rounded-lg bg-kit px-4 py-2 font-semibold text-white hover:bg-kit-dark"
+          className="rounded-lg bg-orange px-4 py-2 font-semibold text-white hover:bg-orange-dark"
         >
           Go to dashboard
         </button>

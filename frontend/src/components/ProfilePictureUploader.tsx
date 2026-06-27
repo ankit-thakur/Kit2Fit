@@ -32,7 +32,7 @@ export function ProfilePictureUploader({ profilePictureUrl, onUploaded }: Profil
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="h-24 w-24 overflow-hidden rounded-full border-2 border-kit bg-kit-light"
+        className="h-24 w-24 overflow-hidden rounded-full border-2 border-blue bg-blue-pale"
       >
         {profilePictureUrl ? (
           <img src={profilePictureUrl} alt="Profile" className="h-full w-full object-cover" />
@@ -41,7 +41,7 @@ export function ProfilePictureUploader({ profilePictureUrl, onUploaded }: Profil
         )}
       </button>
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-      <span className="text-xs text-gray-400">{isUploading ? 'Uploading...' : 'Tap to change photo'}</span>
+      <span className="text-xs text-gray-400">{isUploading ? 'Uploading...' : 'Tap for a glow-up'}</span>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );

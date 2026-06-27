@@ -23,7 +23,7 @@ export function GroupDashboardWidget({ group }: { group: MyGroup }) {
 
   return (
     <div className="space-y-4 rounded-2xl bg-white p-4 shadow">
-      <h2 className="font-extrabold text-kit-dark">{group.name}</h2>
+      <h2 className="font-display font-bold text-navy">{group.name}</h2>
 
       {error && <p className="text-center text-red-500">{error}</p>}
       {isLoading ? (
@@ -31,11 +31,11 @@ export function GroupDashboardWidget({ group }: { group: MyGroup }) {
       ) : (
         <>
           <div>
-            <h3 className="mb-3 text-sm font-bold text-gray-800">Leaderboard</h3>
+            <h3 className="mb-3 text-sm font-bold text-charcoal">Leaderboard</h3>
             <LeaderboardChart leaderboard={leaderboard} />
           </div>
           <div>
-            <h3 className="mb-3 text-sm font-bold text-gray-800">Goal progress (% to goal)</h3>
+            <h3 className="mb-3 text-sm font-bold text-charcoal">Goal progress (% to goal)</h3>
             <ProgressLineChart progress={progress} />
           </div>
         </>

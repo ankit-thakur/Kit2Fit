@@ -36,7 +36,7 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full rounded-lg border-2 border-dashed border-kit py-3 font-semibold text-kit-dark"
+        className="w-full rounded-lg border-2 border-dashed border-orange py-3 font-semibold text-orange-dark"
       >
         + Create a new group
       </button>
@@ -45,7 +45,8 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white p-4 shadow">
-      <h3 className="font-bold text-gray-800">New group</h3>
+      <h3 className="font-display font-bold text-charcoal">Start a new group</h3>
+      <p className="text-xs text-gray-400">Pick people who'll actually show up.</p>
       <input
         required
         placeholder="Group name"
@@ -94,7 +95,7 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-kit py-2 font-semibold text-white hover:bg-kit-dark disabled:opacity-50"
+          className="flex-1 rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark disabled:opacity-50"
         >
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>

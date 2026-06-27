@@ -58,7 +58,7 @@ export function ProfileScreen() {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-kit-dark">Profile</h1>
+        <h1 className="font-display text-2xl font-bold text-navy">Profile</h1>
         <button onClick={signOut} className="text-sm text-gray-400">
           Sign out
         </button>
@@ -100,7 +100,7 @@ export function ProfileScreen() {
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="flex-1 rounded-lg bg-kit py-2 font-semibold text-white hover:bg-kit-dark disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-orange py-2 font-semibold text-white hover:bg-orange-dark disabled:opacity-50"
                 >
                   {isSaving ? 'Saving...' : 'Save'}
                 </button>
@@ -108,11 +108,11 @@ export function ProfileScreen() {
             </div>
           ) : (
             <div className="text-center">
-              <p className="text-lg font-bold text-gray-800">{me.nickname}</p>
+              <p className="text-lg font-bold text-charcoal">{me.nickname}</p>
               <p className="text-sm text-gray-500">{me.name}</p>
               <p className="text-sm text-gray-400">{me.email}</p>
               <p className="text-sm text-gray-400">{me.phoneNumber}</p>
-              <button onClick={() => setIsEditing(true)} className="mt-2 text-sm font-semibold text-kit-dark">
+              <button onClick={() => setIsEditing(true)} className="mt-2 text-sm font-semibold text-navy">
                 Edit profile
               </button>
             </div>
@@ -122,12 +122,13 @@ export function ProfileScreen() {
 
       {groups.length > 0 && (
         <div className="rounded-2xl bg-white p-4 shadow">
-          <h2 className="mb-3 font-bold text-gray-800">Goal progress (% to goal)</h2>
+          <h2 className="font-bold text-charcoal">Goal progress (% to goal)</h2>
+          <p className="mb-3 text-xs text-gray-400">Receipts.</p>
           <MyGoalsProgressChart goals={goals} />
         </div>
       )}
 
-      <h2 className="text-lg font-bold text-gray-800">My groups</h2>
+      <h2 className="font-display text-lg font-bold text-charcoal">Your groups (use them or lose them)</h2>
       {me &&
         groups.map((group) => (
           <MyGroupCard key={group.groupId} group={group} currentUserId={me.userId} onChanged={refresh} />

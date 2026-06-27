@@ -15,7 +15,7 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
   return (
     <div className="rounded-2xl bg-white p-4 shadow">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="font-bold text-gray-800">{group.name}</h3>
+        <h3 className="font-display font-bold text-navy">{group.name}</h3>
         <span className="text-xs text-gray-400">{group.goalCategory}</span>
       </div>
       {membership.goalDescription && (
@@ -28,7 +28,7 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
           value={metricValue}
           onChange={(e) => onMetricValueChange(e.target.value)}
           placeholder={`Current ${membership.metricUnit || 'value'}`}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-kit focus:outline-none"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
         />
         {membership.metricUnit && <span className="text-sm text-gray-500">{membership.metricUnit}</span>}
       </div>

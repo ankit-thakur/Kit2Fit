@@ -49,10 +49,12 @@ export function SignupScreen() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-kit-light px-6">
-      <h1 className="mb-1 text-3xl font-extrabold text-kit-dark">Kit2Fit</h1>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6">
+      <h1 className="mb-1 font-display text-3xl font-bold text-navy">Kit2Fit</h1>
       <p className="mb-8 text-gray-500">
-        {step === 'details' ? 'Pick a funny nickname, friends are waiting.' : 'Check your email for a code.'}
+        {step === 'details'
+          ? "Pick a nickname. Choose wisely — it's basically permanent."
+          : "We emailed you a code. Yes, check spam. It's always spam."}
       </p>
 
       {step === 'details' ? (
@@ -77,9 +79,9 @@ export function SignupScreen() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-kit py-2 font-semibold text-white transition hover:bg-kit-dark disabled:opacity-50"
+            className="w-full rounded-lg bg-orange py-2 font-semibold text-white transition hover:bg-orange-dark disabled:opacity-50"
           >
-            {isSubmitting ? 'Creating account...' : 'Sign up'}
+            {isSubmitting ? 'Building your legend...' : 'Sign up'}
           </button>
         </form>
       ) : (
@@ -89,7 +91,7 @@ export function SignupScreen() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-kit py-2 font-semibold text-white transition hover:bg-kit-dark disabled:opacity-50"
+            className="w-full rounded-lg bg-orange py-2 font-semibold text-white transition hover:bg-orange-dark disabled:opacity-50"
           >
             {isSubmitting ? 'Confirming...' : 'Confirm account'}
           </button>
@@ -98,7 +100,7 @@ export function SignupScreen() {
 
       <p className="mt-4 text-sm text-gray-500">
         Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-kit-dark">
+        <Link to="/login" className="font-semibold text-navy">
           Sign in
         </Link>
       </p>
@@ -128,7 +130,7 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-kit focus:outline-none"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
       />
     </div>
   );

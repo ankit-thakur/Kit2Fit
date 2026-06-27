@@ -22,8 +22,8 @@ function formatRangeLabel(dates: string[]): string {
 }
 
 function dotClass(status: DayStatus, isSelected: boolean): string {
-  if (status === 'full') return isSelected ? 'bg-white' : 'bg-kit';
-  if (status === 'partial') return isSelected ? 'bg-white/60' : 'bg-yellow-400';
+  if (status === 'full') return isSelected ? 'bg-white' : 'bg-orange';
+  if (status === 'partial') return isSelected ? 'bg-white/60' : 'bg-blue-light';
   return isSelected ? 'bg-white/20' : 'bg-gray-200';
 }
 
@@ -55,7 +55,7 @@ export function WeekStrip({
           onClick={onPrevWeek}
           disabled={isLoading}
           aria-label="Previous week"
-          className="px-2 py-1 text-lg text-gray-400 hover:text-kit-dark disabled:opacity-30"
+          className="px-2 py-1 text-lg text-gray-400 hover:text-navy disabled:opacity-30"
         >
           ‹
         </button>
@@ -66,7 +66,7 @@ export function WeekStrip({
           onClick={onNextWeek}
           disabled={!canGoNext || isLoading}
           aria-label="Next week"
-          className="px-2 py-1 text-lg text-gray-400 hover:text-kit-dark disabled:opacity-30"
+          className="px-2 py-1 text-lg text-gray-400 hover:text-navy disabled:opacity-30"
         >
           ›
         </button>
@@ -81,7 +81,7 @@ export function WeekStrip({
               key={date}
               onClick={() => onSelect(date)}
               className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-xs transition ${
-                isSelected ? 'bg-kit text-white' : 'text-gray-600 hover:bg-gray-100'
+                isSelected ? 'bg-orange text-white' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <span>{WEEKDAY_LABELS[d.getDay()]}</span>

@@ -4,4 +4,7 @@
 
 body {
   -webkit-tap-highlight-color: transparent;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #faf6ec;
+  color: #1a1a1e;
 }

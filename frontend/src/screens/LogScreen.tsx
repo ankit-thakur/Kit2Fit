@@ -197,7 +197,10 @@ export function LogScreen() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
-      <h1 className="text-2xl font-extrabold text-kit-dark">Log workout</h1>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-navy">Log workout</h1>
+        <p className="text-sm text-gray-500">Confess your cardio.</p>
+      </div>
 
       <WeekStrip
         dates={weekDates}
@@ -221,7 +224,7 @@ export function LogScreen() {
 
       {groups.length === 0 ? (
         <p className="rounded-2xl bg-white p-4 text-center text-gray-400 shadow">
-          Join or create a group from the Profile tab to start logging.
+          Can't log a workout for a group you're not in. Wild concept, we know. Fix it in the Profile tab.
         </p>
       ) : (
         groups.map((group) => (
@@ -242,9 +245,9 @@ export function LogScreen() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-kit py-3 font-semibold text-white transition hover:bg-kit-dark disabled:opacity-50"
+          className="w-full rounded-lg bg-orange py-3 font-semibold text-white transition hover:bg-orange-dark disabled:opacity-50"
         >
-          {isSubmitting ? 'Saving...' : `${hasAnyExistingLog ? 'Update' : 'Log'} this workout`}
+          {isSubmitting ? 'Locking it in...' : `${hasAnyExistingLog ? 'Update' : 'Log'} this workout`}
         </button>
       )}
     </div>

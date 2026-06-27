@@ -10,7 +10,7 @@ import { ProfileScreen } from './screens/ProfileScreen';
 
 function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-cream pb-20">
       {children}
       <BottomNav />
     </div>

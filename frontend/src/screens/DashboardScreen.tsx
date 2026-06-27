@@ -46,12 +46,12 @@ function SingleGroupDashboard({ groups }: { groups: MyGroup[] }) {
       ) : (
         <>
           <div className="rounded-2xl bg-white p-4 shadow">
-            <h2 className="mb-3 font-bold text-gray-800">Leaderboard</h2>
+            <h2 className="mb-3 font-display font-semibold text-charcoal">Leaderboard</h2>
             <LeaderboardChart leaderboard={leaderboard} />
           </div>
 
           <div className="rounded-2xl bg-white p-4 shadow">
-            <h2 className="mb-3 font-bold text-gray-800">Goal progress (% to goal)</h2>
+            <h2 className="mb-3 font-display font-semibold text-charcoal">Goal progress (% to goal)</h2>
             <ProgressLineChart progress={progress} />
           </div>
         </>
@@ -79,9 +79,10 @@ export function DashboardScreen() {
   if (groups.length === 0) {
     return (
       <div className="mx-auto max-w-lg p-4">
-        <h1 className="mb-4 text-2xl font-extrabold text-kit-dark">Dashboard</h1>
+        <h1 className="mb-1 font-display text-2xl font-bold text-navy">Dashboard</h1>
+        <p className="mb-4 text-sm text-gray-500">Where excuses come to die.</p>
         <p className="rounded-2xl bg-white p-4 text-center text-gray-400 shadow">
-          Join or create a group from the Profile tab to see your dashboard.
+          No groups, no dashboard. We don't make the rules — okay, we do. Go join one from the Profile tab.
         </p>
       </div>
     );
@@ -89,7 +90,10 @@ export function DashboardScreen() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
-      <h1 className="text-2xl font-extrabold text-kit-dark">Dashboard</h1>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-navy">Dashboard</h1>
+        <p className="text-sm text-gray-500">Where excuses come to die.</p>
+      </div>
 
       {error && <p className="text-center text-red-500">{error}</p>}
 

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Kit2Fit Brand Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --navy: #0C2340;
+    --navy-light: #1F3A63;
+    --navy-dark: #071630;
+    --blue: #006BB6;
+    --blue-light: #3FA9F5;
+    --blue-pale: #E3F2FC;
+    --orange: #F58426;
+    --orange-dark: #D4691A;
+    --orange-light: #FBC692;
+    --orange-pale: #FDEBD8;
+    --cream: #FAF6EC;
+    --cream-dark: #F1E9D8;
+    --charcoal: #1A1A1E;
+    --charcoal-light: #54545B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+  }
+  .sheet {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+  }
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange-dark);
+    margin: 0 0 8px;
+  }
+  h1.brand-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    margin: 0 0 4px;
+    color: var(--navy);
+  }
+  .subtitle {
+    font-size: 16px;
+    color: var(--charcoal-light);
+    margin: 0 0 48px;
+  }
+  section {
+    margin-bottom: 56px;
+  }
+  h2.section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--cream-dark);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+  }
+
+  /* Logo lockups */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .logo-card {
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 160px;
+  }
+  .logo-card.on-cream { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .logo-card.on-navy { background: var(--navy); }
+  .logo-card.on-orange { background: var(--orange); }
+  .wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    letter-spacing: -0.01em;
+  }
+  .wordmark .accent { color: var(--orange); }
+  .wordmark.inverse { color: var(--cream); }
+  .wordmark.inverse .accent { color: var(--orange-light); }
+  .wordmark.on-orange-text { color: var(--navy); }
+  .lockup-caption {
+    font-size: 12px;
+    color: var(--charcoal-light);
+  }
+  .lockup-caption.inverse { color: rgba(250,246,236,0.7); }
+
+  .badge {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: var(--navy);
+    border: 3px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--cream);
+  }
+
+  .icon-mark {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* Color swatches */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .swatch {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .swatch-color {
+    height: 84px;
+  }
+  .swatch-label {
+    background: #fff;
+    padding: 10px 12px;
+  }
+  .swatch-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+  .swatch-hex {
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--charcoal-light);
+    margin: 0 0 2px;
+  }
+  .swatch-role {
+    font-size: 11px;
+    color: var(--charcoal-light);
+    margin: 0;
+  }
+
+  /* Font specimen */
+  .specimen-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .specimen-row:last-child { border-bottom: none; }
+  .specimen-label {
+    width: 130px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--charcoal-light);
+    font-family: monospace;
+  }
+  .specimen-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .specimen-sans {
+    font-family: 'Inter', sans-serif;
+  }
+  .voice-sample {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .voice-sample h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--navy);
+    margin: 0 0 4px;
+    font-size: 20px;
+  }
+  .voice-sample p {
+    margin: 0 0 14px;
+    color: var(--charcoal-light);
+    font-size: 14px;
+  }
+  .voice-sample p:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <p class="eyebrow">Brand Guide · v1</p>
+    <h1 class="brand-title">Kit2Fit</h1>
+    <p class="subtitle">Friendly competition. Emphasis on competition. Knicks-coded, gym-class energy.</p>
+
+    <section>
+      <h2 class="section-title">Logo lockups</h2>
+      <div class="logo-grid">
+        <div class="logo-card on-cream">
+          <span class="wordmark">Kit<span class="accent">2</span>Fit</span>
+          <span class="lockup-caption">Primary wordmark — navy on cream/white</span>
+        </div>
+        <div class="logo-card on-navy">
+          <span class="wordmark inverse">Kit<span class="accent">2</span>Fit</span>
+          <span class="lockup-caption inverse">Inverse wordmark — for navy backgrounds</span>
+        </div>
+        <div class="logo-card on-cream">
+          <div class="badge">K2F</div>
+          <span class="lockup-caption">Monogram badge — app icon / favicon</span>
+        </div>
+        <div class="logo-card on-orange">
+          <svg class="icon-mark" viewBox="0 0 64 64" fill="none">
+            <rect x="4" y="26" width="10" height="12" rx="2" fill="#0C2340"/>
+            <rect x="50" y="26" width="10" height="12" rx="2" fill="#0C2340"/>
+            <rect x="14" y="30" width="4" height="4" fill="#0C2340"/>
+            <rect x="46" y="30" width="4" height="4" fill="#0C2340"/>
+            <rect x="18" y="29" width="28" height="6" rx="3" fill="#FAF6EC"/>
+          </svg>
+          <span class="lockup-caption">Icon mark — dumbbell glyph, app tiles</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Color palette</h2>
+      <div class="color-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--navy);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Navy</p>
+            <p class="swatch-hex">#0C2340</p>
+            <p class="swatch-role">Headlines, nav bar</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--blue);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Knicks Blue</p>
+            <p class="swatch-hex">#006BB6</p>
+            <p class="swatch-role">Links, secondary actions</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--blue-light);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Bright Blue</p>
+            <p class="swatch-hex">#3FA9F5</p>
+            <p class="swatch-role">Focus rings, highlights</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--blue-pale);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Pale Blue</p>
+            <p class="swatch-hex">#E3F2FC</p>
+            <p class="swatch-role">Tinted surfaces</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--orange);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Knicks Orange</p>
+            <p class="swatch-hex">#F58426</p>
+            <p class="swatch-role">Primary buttons, CTAs</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--orange-dark);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Burnt Orange</p>
+            <p class="swatch-hex">#D4691A</p>
+            <p class="swatch-role">Button hover/active</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--orange-pale);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Pale Orange</p>
+            <p class="swatch-hex">#FDEBD8</p>
+            <p class="swatch-role">Tinted surfaces, points panel</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--cream); border-bottom: 1px solid #eee;"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Cream</p>
+            <p class="swatch-hex">#FAF6EC</p>
+            <p class="swatch-role">App background</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--cream-dark);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Eggshell</p>
+            <p class="swatch-hex">#F1E9D8</p>
+            <p class="swatch-role">Card dividers, subtle bg</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--charcoal);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Charcoal</p>
+            <p class="swatch-hex">#1A1A1E</p>
+            <p class="swatch-role">Body text</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--charcoal-light);"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">Slate Grey</p>
+            <p class="swatch-hex">#54545B</p>
+            <p class="swatch-role">Secondary text</p>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: #fff; border-bottom: 1px solid #eee;"></div>
+          <div class="swatch-label">
+            <p class="swatch-name">White</p>
+            <p class="swatch-hex">#FFFFFF</p>
+            <p class="swatch-role">Card surfaces</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Typography</h2>
+      <div class="specimen-row">
+        <span class="specimen-label">Display / 44px / 700</span>
+        <span class="specimen-display" style="font-size: 44px; font-weight: 700;">Log your sweat</span>
+      </div>
+      <div class="specimen-row">
+        <span class="specimen-label">Display / 28px / 600</span>
+        <span class="specimen-display" style="font-size: 28px; font-weight: 600;">Dashboard</span>
+      </div>
+      <div class="specimen-row">
+        <span class="specimen-label">Display / 20px / 600</span>
+        <span class="specimen-display" style="font-size: 20px; font-weight: 600;">Marathon Crew</span>
+      </div>
+      <div class="specimen-row">
+        <span class="specimen-label">Body / 16px / 500</span>
+        <span class="specimen-sans" style="font-size: 16px; font-weight: 500;">Friendly competition. Emphasis on competition.</span>
+      </div>
+      <div class="specimen-row">
+        <span class="specimen-label">Body / 14px / 400</span>
+        <span class="specimen-sans" style="font-size: 14px;">Bonus points land after you hit submit. We're thorough, not psychic.</span>
+      </div>
+      <div class="specimen-row">
+        <span class="specimen-label">Caption / 12px / 400</span>
+        <span class="specimen-sans" style="font-size: 12px; color: var(--charcoal-light);">Expires in 7 days. Don't be the one who waits 8.</span>
+      </div>
+      <p style="margin-top:20px; font-size: 13px; color: var(--charcoal-light);">
+        Headings: <strong>Space Grotesk</strong> (500/600/700) — bold, geometric, a little sporty.<br/>
+        Body: <strong>Inter</strong> (400/500/600/700) — the legibility workhorse, everywhere else.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="section-title">Voice</h2>
+      <div class="voice-sample">
+        <h3>Dashboard</h3>
+        <p>Where excuses come to die.</p>
+        <h3>Empty state</h3>
+        <p>No groups, no dashboard. We don't make the rules — okay, we do. Go join one from the Profile tab.</p>
+        <h3>Invite link</h3>
+        <p>Expires in 7 days. Don't be the one who waits 8.</p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

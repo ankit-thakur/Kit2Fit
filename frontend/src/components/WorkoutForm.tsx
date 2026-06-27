@@ -19,7 +19,7 @@ export function WorkoutForm({
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow">
-      <h2 className="mb-3 text-lg font-bold text-gray-800">{heading}</h2>
+      <h2 className="mb-3 font-display text-lg font-bold text-charcoal">{heading}</h2>
       <div className="mb-3">
         <label className="mb-1 block text-sm font-medium text-gray-700">Minutes worked out</label>
         <input
@@ -27,7 +27,7 @@ export function WorkoutForm({
           min={0}
           value={minutesWorkedOut}
           onChange={(e) => onMinutesChange(Number(e.target.value))}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-kit focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
         />
       </div>
       <div className="mb-3">
@@ -36,16 +36,16 @@ export function WorkoutForm({
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           rows={3}
-          placeholder="e.g. 30 min jog + jump rope finisher"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-kit focus:outline-none"
+          placeholder="e.g. 30 min jog (or a brisk walk you're calling a jog)"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue focus:outline-none"
         />
       </div>
-      <div className="flex items-center justify-between rounded-lg bg-kit-light px-3 py-2">
+      <div className="flex items-center justify-between rounded-lg bg-orange-pale px-3 py-2">
         <span className="text-sm text-gray-600">Duration points (live preview)</span>
-        <span className="text-lg font-bold text-kit-dark">{previewPoints}</span>
+        <span className="text-lg font-bold text-orange-dark">{previewPoints}</span>
       </div>
       <p className="mt-2 text-xs text-gray-400">
-        Goal + challenge bonus points are calculated on submit per group.
+        Bonus points land after you hit submit. We're thorough, not psychic.
       </p>
     </div>
   );

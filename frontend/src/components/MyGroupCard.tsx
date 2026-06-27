@@ -64,14 +64,14 @@ export function MyGroupCard({
     <div className="space-y-3 rounded-2xl bg-white p-4 shadow">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-bold text-gray-800">{group.name}</h3>
+          <h3 className="font-display font-bold text-navy">{group.name}</h3>
           <p className="text-xs text-gray-400">
             {group.goalCategory} · {group.challengeStartDate.slice(0, 10)} → {group.challengeEndDate.slice(0, 10)}
           </p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
-            <button onClick={() => setIsManaging((v) => !v)} className="text-xs font-semibold text-kit-dark">
+            <button onClick={() => setIsManaging((v) => !v)} className="text-xs font-semibold text-blue">
               {isManaging ? 'Hide' : 'Manage'}
             </button>
           )}
@@ -85,7 +85,7 @@ export function MyGroupCard({
 
       {isLocked ? (
         <p className="text-sm text-gray-500">
-          Goal: {membership.goalDescription || 'none set'} ({membership.startingMetricValue} →{' '}
+          Goal: {membership.goalDescription || 'no goal set (bold strategy)'} ({membership.startingMetricValue} →{' '}
           {membership.currentMetricValue} / {membership.targetMetricValue} {membership.metricUnit})
           {progressPercent !== null && <span className="font-semibold"> · {Math.round(progressPercent)}%</span>}
         </p>
@@ -124,7 +124,7 @@ export function MyGroupCard({
           <button
             onClick={handleSaveGoal}
             disabled={isSaving}
-            className="w-full rounded-lg bg-kit-light py-2 text-sm font-semibold text-kit-dark disabled:opacity-50"
+            className="w-full rounded-lg bg-orange-pale py-2 text-sm font-semibold text-orange-dark disabled:opacity-50"
           >
             {isSaving ? 'Saving...' : 'Save goal'}
           </button>

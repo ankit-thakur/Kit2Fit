@@ -1,7 +1,7 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { MyGoalProgress } from '../api/users';
 
-const COLORS = ['#ff6b35', '#2a9d8f', '#3a86ff', '#8338ec', '#e63946', '#ffb703'];
+const COLORS = ['#F58426', '#006BB6', '#0C2340', '#3FA9F5', '#D4691A', '#54545B'];
 
 type Row = Record<string, number | string | null>;
 
