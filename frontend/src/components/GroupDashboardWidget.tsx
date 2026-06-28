@@ -45,7 +45,9 @@ export function GroupDashboardWidget({ group }: { group: MyGroup }) {
         <>
           <div>
             <h3 className="mb-3 text-sm font-bold text-charcoal">Leaderboard</h3>
-            <LeaderboardChart leaderboard={leaderboard} />
+            <div className="-mx-4 overflow-hidden">
+              <LeaderboardChart leaderboard={leaderboard} />
+            </div>
           </div>
           <div>
             <h3 className="mb-3 text-sm font-bold text-charcoal">Goal progress (% to goal)</h3>

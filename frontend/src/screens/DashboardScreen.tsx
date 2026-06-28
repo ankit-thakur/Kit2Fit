@@ -62,7 +62,9 @@ function SingleGroupDashboard({ groups }: { groups: MyGroup[] }) {
         <>
           <div className="rounded-2xl bg-white p-4 shadow">
             <h2 className="mb-3 font-display font-semibold text-charcoal">Leaderboard</h2>
-            <LeaderboardChart leaderboard={leaderboard} />
+            <div className="-mx-4 overflow-hidden">
+              <LeaderboardChart leaderboard={leaderboard} />
+            </div>
           </div>
 
           <div className="rounded-2xl bg-white p-4 shadow">

@@ -27,7 +27,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
   });
   const [memberEmail, setMemberEmail] = useState('');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [challengeForm, setChallengeForm] = useState({ description: '', keywords: '', startDate: '', endDate: '' });
+  const [challengeForm, setChallengeForm] = useState({ title: '', description: '', startDate: '', endDate: '' });
 
   async function refresh() {
     setIsLoading(true);
@@ -102,12 +102,12 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
     e.preventDefault();
     try {
       await createChallenge(groupId, {
+        title: challengeForm.title,
         description: challengeForm.description,
-        keywords: challengeForm.keywords.split(',').map((k) => k.trim()).filter(Boolean),
         startDate: challengeForm.startDate,
         endDate: challengeForm.endDate,
       });
-      setChallengeForm({ description: '', keywords: '', startDate: '', endDate: '' });
+      setChallengeForm({ title: '', description: '', startDate: '', endDate: '' });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create challenge');
@@ -220,11 +220,11 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
             {challenges.map((challenge) => (
               <div key={challenge.challengeId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
                 <span className="text-sm text-gray-700">
-                  {challenge.description} (
+                  {challenge.title} (
                   {challenge.startDate === challenge.endDate
                     ? challenge.startDate
                     : `${challenge.startDate} → ${challenge.endDate}`}
-                  ) — {challenge.keywords.join(', ')}
+                  )
                 </span>
                 <button onClick={() => handleDeleteChallenge(challenge.challengeId)} className="text-xs text-red-500">
                   Delete
@@ -234,20 +234,21 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
             <form onSubmit={handleCreateChallenge} className="space-y-2">
               <input
                 required
-                placeholder="Description (e.g. Burpee Tuesday)"
+                placeholder="Title (e.g. Burpee Tuesday)"
+                value={challengeForm.title}
+                onChange={(e) => setChallengeForm((p) => ({ ...p, title: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+              <textarea
+                required
+                rows={2}
+                placeholder="What counts? (e.g. Do at least 50 burpees in your workout)"
                 value={challengeForm.description}
                 onChange={(e) => setChallengeForm((p) => ({ ...p, description: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
-              <input
-                required
-                placeholder="Keywords, comma separated (e.g. jump rope, skip)"
-                value={challengeForm.keywords}
-                onChange={(e) => setChallengeForm((p) => ({ ...p, keywords: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-              />
               <div className="flex gap-2">
-                <label className="flex-1 text-xs text-gray-500">
+                <label className="min-w-0 flex-1 text-xs text-gray-500">
                   Start date
                   <input
                     required
@@ -257,7 +258,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
                   />
                 </label>
-                <label className="flex-1 text-xs text-gray-500">
+                <label className="min-w-0 flex-1 text-xs text-gray-500">
                   End date
                   <input
                     required

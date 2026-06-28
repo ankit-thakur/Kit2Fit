@@ -4,6 +4,14 @@ import type { AdhocChallenge } from '@shared/types';
 import { listChallenges } from '../api/groups';
 import type { MyGroup } from '../api/groups';
 
+function formatDaysLeft(endDate: string): string {
+  const today = new Date().toISOString().slice(0, 10);
+  if (endDate === today) return 'Last day';
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysLeft = Math.round((new Date(endDate).getTime() - new Date(today).getTime()) / msPerDay);
+  return `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+}
+
 export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClose: () => void }) {
   const [challenges, setChallenges] = useState<AdhocChallenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,12 +66,10 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
             <p className="text-sm text-gray-400">No active challenges right now.</p>
           ) : (
             challenges.map((challenge) => (
-              <div key={challenge.challengeId} className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">
-                {challenge.description} (
-                {challenge.startDate === challenge.endDate
-                  ? challenge.startDate
-                  : `${challenge.startDate} → ${challenge.endDate}`}
-                )
+              <div key={challenge.challengeId} className="rounded-lg bg-gray-50 px-3 py-2">
+                <p className="text-sm font-semibold text-charcoal">{challenge.title}</p>
+                <p className="mt-0.5 text-xs text-gray-600">{challenge.description}</p>
+                <p className="mt-1 text-xs text-gray-400">{formatDaysLeft(challenge.endDate)}</p>
               </div>
             ))
           )}

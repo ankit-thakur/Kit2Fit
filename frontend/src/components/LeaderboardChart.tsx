@@ -10,7 +10,7 @@ export function LeaderboardChart({ leaderboard }: { leaderboard: LeaderboardEntr
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(200, leaderboard.length * 50)}>
-      <BarChart data={leaderboard} layout="vertical" margin={{ left: 16, right: 48 }}>
+      <BarChart data={leaderboard} layout="vertical" margin={{ left: 0, right: 40 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} />
         <XAxis type="number" allowDecimals={false} />
         <YAxis type="category" dataKey="nickname" width={90} />

@@ -82,10 +82,10 @@ export function MyGoalsProgressChart({ goals }: { goals: MyGoalProgress[] }) {
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data}>
+      <LineChart data={data} margin={{ top: 5, right: 8, bottom: 5, left: 3 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-        <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
+        <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} width={32} />
         <Tooltip content={<ProgressTooltip unitByLabel={unitByLabel} />} />
         <Legend />
         {goals.map((goal, i) => (

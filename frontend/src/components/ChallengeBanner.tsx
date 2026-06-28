@@ -6,6 +6,7 @@ interface ChallengeWithGroup {
   groupId: string;
   groupName: string;
   challengeId: string;
+  title: string;
   description: string;
   startDate: string;
   endDate: string;
@@ -17,8 +18,11 @@ function todayIso(): string {
 
 function formatWindow(startDate: string, endDate: string): string {
   const today = todayIso();
-  if (startDate === endDate) return 'Today';
-  return endDate === today ? 'Last day' : `Through ${endDate}`;
+  if (startDate === endDate) return 'Today only';
+  if (endDate === today) return 'Last day';
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysLeft = Math.round((new Date(endDate).getTime() - new Date(today).getTime()) / msPerDay);
+  return `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
 }
 
 export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
@@ -38,6 +42,7 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
             groupId: group.groupId,
             groupName: group.name,
             challengeId: challenge.challengeId,
+            title: challenge.title,
             description: challenge.description,
             startDate: challenge.startDate,
             endDate: challenge.endDate,
@@ -85,8 +90,9 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
             <div className="space-y-2">
               {challenges.map((challenge) => (
                 <div key={`${challenge.groupId}-${challenge.challengeId}`} className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-sm font-semibold text-charcoal">{challenge.description}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm font-semibold text-charcoal">{challenge.title}</p>
+                  <p className="mt-0.5 text-xs text-gray-600">{challenge.description}</p>
+                  <p className="mt-1 text-xs text-gray-400">
                     {formatWindow(challenge.startDate, challenge.endDate)}
                     {showGroupName ? ` · ${challenge.groupName}` : ''}
                   </p>

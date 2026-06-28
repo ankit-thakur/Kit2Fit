@@ -16,9 +16,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await requireAdmin(groupId, userId);
 
     const body = JSON.parse(event.body ?? '{}');
-    const { description, keywords, startDate, endDate } = body;
-    if (!description || !Array.isArray(keywords) || keywords.length === 0 || !startDate || !endDate) {
-      throw new HttpError(400, 'description, keywords (non-empty array), startDate, and endDate are required');
+    const { title, description, startDate, endDate } = body;
+    if (!title || !description || !startDate || !endDate) {
+      throw new HttpError(400, 'title, description, startDate, and endDate are required');
     }
     if (startDate > endDate) {
       throw new HttpError(400, 'startDate must be on or before endDate');
@@ -33,8 +33,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Item: {
           groupId,
           challengeId,
+          title,
           description,
-          keywords,
           startDate,
           endDate,
           createdBy: userId,
@@ -43,6 +43,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       }),
     );
 
-    return json(201, { groupId, challengeId, description, keywords, startDate, endDate });
+    return json(201, { groupId, challengeId, title, description, startDate, endDate });
   });
 }
