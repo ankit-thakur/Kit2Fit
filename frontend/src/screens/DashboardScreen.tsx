@@ -5,6 +5,7 @@ import { LeaderboardChart } from '../components/LeaderboardChart';
 import { ProgressLineChart } from '../components/ProgressLineChart';
 import { GroupDashboardWidget } from '../components/GroupDashboardWidget';
 import { RulesAndScoringModal } from '../components/RulesAndScoringModal';
+import { ChallengeBanner } from '../components/ChallengeBanner';
 
 const WIDGET_STACK_MAX_GROUPS = 3;
 
@@ -108,6 +109,8 @@ export function DashboardScreen() {
         <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
         <p className="text-sm text-gray-500">Where excuses come to die.</p>
       </div>
+
+      <ChallengeBanner groups={groups} />
 
       {error && <p className="text-center text-red-500">{error}</p>}
 
