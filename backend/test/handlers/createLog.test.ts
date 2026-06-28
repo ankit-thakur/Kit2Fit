@@ -143,6 +143,55 @@ describe('createLog handler', () => {
     expect(updateCall.ExpressionAttributeValues).toEqual({ ':points': 2 });
   });
 
+  it('awards the goal bonus from metric progress alone when the LLM says the workout is unrelated', async () => {
+    ddbMock
+      .on(GetCommand, {
+        TableName: 'GroupMemberships',
+        Key: { groupId: 'group-1', userId: 'user-1' },
+      })
+      .resolves({
+        Item: {
+          groupId: 'group-1',
+          userId: 'user-1',
+          goalDescription: 'Lose 10 pounds',
+          metricUnit: 'lbs',
+          currentMetricValue: 200,
+          targetMetricValue: 180,
+          totalPoints: 10,
+        },
+      });
+    ddbMock
+      .on(GetCommand, { TableName: 'DailyLogs', Key: { groupIdUserId: 'group-1#user-1', date: '2026-06-01' } })
+      .resolves({ Item: undefined });
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(UpdateCommand).resolves({});
+
+    (judgeGoalContribution as jest.Mock).mockResolvedValue({
+      contributes: false,
+      reason: 'Stretching is not weight-loss specific.',
+    });
+    (matchAdhocChallenge as jest.Mock).mockResolvedValue({ matched: false });
+
+    const event = buildEvent({
+      date: '2026-06-01',
+      minutesWorkedOut: 15,
+      description: 'Stretched today',
+      metricValueAfter: 198,
+    });
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(201);
+    const body = JSON.parse(result.body);
+    expect(body.llmBonusPoint).toBe(1);
+    expect(body.llmBonusReason).toBe('Your lbs moved from 200 to 198, trending toward your goal.');
+
+    const putCall = ddbMock.commandCalls(PutCommand)[0].args[0].input;
+    expect(putCall.Item).toMatchObject({
+      llmBonusPoint: 1,
+      llmBonusReason: 'Your lbs moved from 200 to 198, trending toward your goal.',
+    });
+  });
+
   it('rejects a duplicate log for the same date', async () => {
     ddbMock
       .on(GetCommand, {
