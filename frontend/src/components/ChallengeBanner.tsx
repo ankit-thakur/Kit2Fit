@@ -14,18 +14,6 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function tomorrowIso(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
-function formatChallengeDate(date: string): string {
-  if (date === todayIso()) return 'Today';
-  if (date === tomorrowIso()) return 'Tomorrow';
-  return date;
-}
-
 export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
   const [challenges, setChallenges] = useState<ChallengeWithGroup[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -35,9 +23,10 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
       setChallenges([]);
       return;
     }
+    const today = todayIso();
     Promise.all(
       groups.map((group) =>
-        listChallenges(group.groupId).then(({ challenges: groupChallenges }) =>
+        listChallenges(group.groupId, today).then(({ challenges: groupChallenges }) =>
           groupChallenges.map((challenge) => ({
             groupId: group.groupId,
             groupName: group.name,
@@ -48,14 +37,7 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
         ),
       ),
     )
-      .then((lists) => {
-        const today = todayIso();
-        const upcoming = lists
-          .flat()
-          .filter((challenge) => challenge.activeDate >= today)
-          .sort((a, b) => a.activeDate.localeCompare(b.activeDate));
-        setChallenges(upcoming);
-      })
+      .then((lists) => setChallenges(lists.flat()))
       .catch(() => setChallenges([]));
   }, [groups]);
 
@@ -97,8 +79,7 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
                 <div key={`${challenge.groupId}-${challenge.challengeId}`} className="rounded-lg bg-gray-50 p-3">
                   <p className="text-sm font-semibold text-charcoal">{challenge.description}</p>
                   <p className="text-xs text-gray-400">
-                    {formatChallengeDate(challenge.activeDate)}
-                    {showGroupName ? ` · ${challenge.groupName}` : ''}
+                    Today{showGroupName ? ` · ${challenge.groupName}` : ''}
                   </p>
                 </div>
               ))}
