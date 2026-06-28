@@ -50,7 +50,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           }),
         );
 
-        const series = logs.map((log) => ({
+        const series = logs.filter((log) => log.metricValueAfter != null).map((log) => ({
           date: log.date,
           percent: calculateGoalProgressPercent(
             membership.startingMetricValue ?? 0,

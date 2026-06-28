@@ -88,11 +88,9 @@ export class Kit2FitStack extends cdk.Stack {
       signInAliases: { email: true },
       autoVerify: { email: true },
       standardAttributes: {
-        phoneNumber: { required: true, mutable: true },
-      },
-      customAttributes: {
-        name: new cognito.StringAttribute({ mutable: true }),
-        nickname: new cognito.StringAttribute({ mutable: true }),
+        phoneNumber: { required: false, mutable: true },
+        fullname: { required: false, mutable: true },
+        nickname: { required: false, mutable: true },
       },
       passwordPolicy: {
         minLength: 8,

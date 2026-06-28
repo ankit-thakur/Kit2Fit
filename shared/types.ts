@@ -40,7 +40,7 @@ export interface DailyLog {
   date: string;
   minutesWorkedOut: number;
   description: string;
-  metricValueAfter: number;
+  metricValueAfter?: number;
   durationPoints: number;
   llmBonusPoint: 0 | 1;
   llmBonusReason: string;

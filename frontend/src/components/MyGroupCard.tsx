@@ -98,22 +98,28 @@ export function MyGroupCard({
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
           <div className="flex gap-2">
-            <input
-              type="number"
-              step="any"
-              placeholder="Starting value"
-              value={goalForm.currentMetricValue}
-              onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-            <input
-              type="number"
-              step="any"
-              placeholder="Target value"
-              value={goalForm.targetMetricValue}
-              onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-gray-600">Starting value</label>
+              <input
+                type="number"
+                step="any"
+                placeholder="e.g. 180"
+                value={goalForm.currentMetricValue}
+                onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-gray-600">Target value</label>
+              <input
+                type="number"
+                step="any"
+                placeholder="e.g. 160"
+                value={goalForm.targetMetricValue}
+                onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
           </div>
           <input
             placeholder="Unit (lbs, min, etc)"

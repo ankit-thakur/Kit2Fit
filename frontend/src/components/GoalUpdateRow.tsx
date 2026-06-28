@@ -21,16 +21,21 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
       {membership.goalDescription && (
         <p className="mb-2 text-sm text-gray-500">Goal: {membership.goalDescription}</p>
       )}
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          step="any"
-          value={metricValue}
-          onChange={(e) => onMetricValueChange(e.target.value)}
-          placeholder={`Current ${membership.metricUnit || 'value'}`}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-coral focus:outline-none"
-        />
-        {membership.metricUnit && <span className="text-sm text-gray-500">{membership.metricUnit}</span>}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          Goal tracking {membership.metricUnit ? `(${membership.metricUnit})` : ''}
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            step="any"
+            value={metricValue}
+            onChange={(e) => onMetricValueChange(e.target.value)}
+            placeholder={`Current ${membership.metricUnit || 'value'} (optional)`}
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-coral focus:outline-none"
+          />
+          {membership.metricUnit && <span className="text-sm text-gray-500">{membership.metricUnit}</span>}
+        </div>
       </div>
 
       {result && (

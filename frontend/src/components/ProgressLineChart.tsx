@@ -83,7 +83,8 @@ export function ProgressLineChart({ progress }: { progress: ProgressEntry[] }) {
             dataKey={entry.nickname}
             stroke={COLORS[i % COLORS.length]}
             connectNulls
-            dot={false}
+            dot={{ r: 3 }}
+            activeDot={{ r: 5 }}
           />
         ))}
       </LineChart>

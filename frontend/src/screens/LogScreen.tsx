@@ -123,34 +123,24 @@ export function LogScreen() {
   async function handleSubmit() {
     setIsSubmitting(true);
     setResults({});
-
-    const nextErrors: Record<string, string> = {};
-    const toSubmit: { group: MyGroup; metricValueAfter: number }[] = [];
-    for (const group of groups) {
-      const parsed = parseMetricValue(metricValues[group.groupId]);
-      if (parsed === null) {
-        nextErrors[group.groupId] = `Enter your current ${group.membership.metricUnit || 'value'}`;
-      } else {
-        toSubmit.push({ group, metricValueAfter: parsed });
-      }
-    }
-    setErrors(nextErrors);
+    setErrors({});
 
     await Promise.all(
-      toSubmit.map(async ({ group, metricValueAfter }) => {
+      groups.map(async (group) => {
+        const metricValueAfter = parseMetricValue(metricValues[group.groupId]) ?? undefined;
         const existingLog = logsByGroup[group.groupId]?.[selectedDate];
         try {
           const result = existingLog
             ? await updateLog(group.groupId, selectedDate, {
                 minutesWorkedOut,
                 description,
-                metricValueAfter,
+                ...(metricValueAfter !== undefined ? { metricValueAfter } : {}),
               })
             : await createLog(group.groupId, {
                 date: selectedDate,
                 minutesWorkedOut,
                 description,
-                metricValueAfter,
+                ...(metricValueAfter !== undefined ? { metricValueAfter } : {}),
               });
           setResults((prev) => ({ ...prev, [group.groupId]: result }));
           setLogsByGroup((prev) => ({
@@ -164,7 +154,7 @@ export function LogScreen() {
                 date: selectedDate,
                 minutesWorkedOut,
                 description,
-                metricValueAfter,
+                ...(metricValueAfter !== undefined ? { metricValueAfter } : {}),
                 durationPoints: result.durationPoints,
                 llmBonusPoint: result.llmBonusPoint,
                 llmBonusReason: result.llmBonusReason,

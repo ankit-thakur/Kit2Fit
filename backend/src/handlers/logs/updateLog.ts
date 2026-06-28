@@ -31,7 +31,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const body = JSON.parse(event.body ?? '{}');
     const minutesWorkedOut = body.minutesWorkedOut ?? existingLog.minutesWorkedOut;
     const description = body.description ?? existingLog.description;
-    const metricValueAfter = body.metricValueAfter ?? existingLog.metricValueAfter;
+    const metricValueAfter: number | null =
+      typeof body.metricValueAfter === 'number'
+        ? body.metricValueAfter
+        : existingLog.metricValueAfter ?? null;
 
     const durationPoints = calculateDurationPoints(minutesWorkedOut);
 
@@ -41,7 +44,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         goalDescription: membership.goalDescription ?? '',
         metricUnit: membership.metricUnit ?? '',
         previousMetricValue: membership.currentMetricValue ?? 0,
-        newMetricValue: metricValueAfter,
+        newMetricValue: metricValueAfter ?? membership.currentMetricValue ?? 0,
       }),
       matchAdhocChallenge(groupId, date, description),
       hasLaterLog(groupIdUserId, date),
@@ -60,7 +63,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           ...existingLog,
           minutesWorkedOut,
           description,
-          metricValueAfter,
+          ...(metricValueAfter !== null ? { metricValueAfter } : { metricValueAfter: undefined }),
           durationPoints,
           llmBonusPoint,
           llmBonusReason: judgeResult.reason,
@@ -76,12 +79,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       new UpdateCommand({
         TableName: Tables.groupMemberships,
         Key: { groupId, userId },
-        UpdateExpression: isBackfill
-          ? 'ADD totalPoints :delta'
-          : 'SET currentMetricValue = :metricValueAfter ADD totalPoints :delta',
-        ExpressionAttributeValues: isBackfill
-          ? { ':delta': pointsDelta }
-          : { ':metricValueAfter': metricValueAfter, ':delta': pointsDelta },
+        UpdateExpression:
+          isBackfill || metricValueAfter === null
+            ? 'ADD totalPoints :delta'
+            : 'SET currentMetricValue = :metricValueAfter ADD totalPoints :delta',
+        ExpressionAttributeValues:
+          !isBackfill && metricValueAfter !== null
+            ? { ':metricValueAfter': metricValueAfter, ':delta': pointsDelta }
+            : { ':delta': pointsDelta },
       }),
     );
 

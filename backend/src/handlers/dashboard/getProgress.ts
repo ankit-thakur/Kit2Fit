@@ -54,6 +54,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       { date: string; percent: number | null; metricValue: number }[]
     >();
     for (const log of logs) {
+      if (log.metricValueAfter == null) continue;
       const member = membersById.get(log.userId);
       const percent = member
         ? calculateGoalProgressPercent(

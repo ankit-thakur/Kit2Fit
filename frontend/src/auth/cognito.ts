@@ -24,8 +24,8 @@ export function signUp(input: SignUpInput): Promise<void> {
   const attributes = [
     new CognitoUserAttribute({ Name: 'email', Value: input.email }),
     new CognitoUserAttribute({ Name: 'phone_number', Value: input.phoneNumber }),
-    new CognitoUserAttribute({ Name: 'custom:name', Value: input.name }),
-    new CognitoUserAttribute({ Name: 'custom:nickname', Value: input.nickname }),
+    new CognitoUserAttribute({ Name: 'name', Value: input.name }),
+    new CognitoUserAttribute({ Name: 'nickname', Value: input.nickname }),
   ];
 
   return new Promise((resolve, reject) => {

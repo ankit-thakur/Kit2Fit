@@ -5,7 +5,7 @@ export interface CreateLogInput {
   date: string;
   minutesWorkedOut: number;
   description: string;
-  metricValueAfter: number;
+  metricValueAfter?: number;
 }
 
 export interface CreateLogResult {

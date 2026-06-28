@@ -95,7 +95,8 @@ export function MyGoalsProgressChart({ goals }: { goals: MyGoalProgress[] }) {
             dataKey={labelByGroupId.get(goal.groupId)!}
             stroke={COLORS[i % COLORS.length]}
             connectNulls
-            dot={false}
+            dot={{ r: 3 }}
+            activeDot={{ r: 5 }}
           />
         ))}
       </LineChart>

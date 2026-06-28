@@ -20,17 +20,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const membership = await requireMembership(groupId, userId);
 
     const body = JSON.parse(event.body ?? '{}');
-    const { date, minutesWorkedOut, description, metricValueAfter } = body;
-    if (
-      !date ||
-      typeof minutesWorkedOut !== 'number' ||
-      typeof description !== 'string' ||
-      typeof metricValueAfter !== 'number'
-    ) {
-      throw new HttpError(
-        400,
-        'date, minutesWorkedOut, description, and metricValueAfter are required',
-      );
+    const { date, minutesWorkedOut, description } = body;
+    const metricValueAfter: number | null = typeof body.metricValueAfter === 'number' ? body.metricValueAfter : null;
+    if (!date || typeof minutesWorkedOut !== 'number' || typeof description !== 'string') {
+      throw new HttpError(400, 'date, minutesWorkedOut, and description are required');
     }
 
     const groupIdUserId = `${groupId}#${userId}`;
@@ -49,7 +42,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         goalDescription: membership.goalDescription ?? '',
         metricUnit: membership.metricUnit ?? '',
         previousMetricValue: membership.currentMetricValue ?? 0,
-        newMetricValue: metricValueAfter,
+        newMetricValue: metricValueAfter ?? membership.currentMetricValue ?? 0,
       }),
       matchAdhocChallenge(groupId, date, description),
       hasLaterLog(groupIdUserId, date),
@@ -71,7 +64,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           date,
           minutesWorkedOut,
           description,
-          metricValueAfter,
+          ...(metricValueAfter !== null ? { metricValueAfter } : {}),
           durationPoints,
           llmBonusPoint,
           llmBonusReason: judgeResult.reason,
@@ -88,12 +81,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       new UpdateCommand({
         TableName: Tables.groupMemberships,
         Key: { groupId, userId },
-        UpdateExpression: isBackfill
-          ? 'ADD totalPoints :points'
-          : 'SET currentMetricValue = :metricValueAfter ADD totalPoints :points',
-        ExpressionAttributeValues: isBackfill
-          ? { ':points': totalPointsForDay }
-          : { ':metricValueAfter': metricValueAfter, ':points': totalPointsForDay },
+        UpdateExpression:
+          isBackfill || metricValueAfter === null
+            ? 'ADD totalPoints :points'
+            : 'SET currentMetricValue = :metricValueAfter ADD totalPoints :points',
+        ExpressionAttributeValues:
+          !isBackfill && metricValueAfter !== null
+            ? { ':metricValueAfter': metricValueAfter, ':points': totalPointsForDay }
+            : { ':points': totalPointsForDay },
       }),
     );
 
