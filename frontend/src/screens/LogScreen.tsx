@@ -5,6 +5,7 @@ import type { DailyLog } from '@shared/types';
 import { WorkoutForm } from '../components/WorkoutForm';
 import { GoalUpdateRow } from '../components/GoalUpdateRow';
 import { WeekStrip, type DayStatus } from '../components/WeekStrip';
+import { ChallengeBanner } from '../components/ChallengeBanner';
 import { ApiError } from '../api/client';
 
 function today(): string {
@@ -191,6 +192,8 @@ export function LogScreen() {
         <h1 className="font-display text-2xl font-bold text-ink">Log workout</h1>
         <p className="text-sm text-gray-500">Confess your cardio.</p>
       </div>
+
+      <ChallengeBanner groups={groups} />
 
       <WeekStrip
         dates={weekDates}

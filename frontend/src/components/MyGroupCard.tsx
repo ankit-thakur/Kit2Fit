@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MyGroup } from '../api/groups';
 import { updateMemberGoal, removeMember } from '../api/groups';
 import { GroupAdminPanel } from './GroupAdminPanel';
+import { RulesAndScoringModal } from './RulesAndScoringModal';
 import { calculateGoalProgressPercent } from '@shared/progress';
 
 export function MyGroupCard({
@@ -18,6 +19,7 @@ export function MyGroupCard({
   const isLocked = new Date() >= new Date(group.challengeStartDate);
 
   const [isManaging, setIsManaging] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const [goalForm, setGoalForm] = useState({
     goalDescription: membership.goalDescription,
     currentMetricValue: String(membership.currentMetricValue),
@@ -69,7 +71,14 @@ export function MyGroupCard({
             {group.goalCategory} · {group.challengeStartDate.slice(0, 10)} → {group.challengeEndDate.slice(0, 10)}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowRules(true)}
+            aria-label="Rules & scoring"
+            className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 text-xs font-bold text-gray-400"
+          >
+            i
+          </button>
           {isAdmin && (
             <button onClick={() => setIsManaging((v) => !v)} className="text-xs font-semibold text-coral">
               {isManaging ? 'Hide' : 'Manage'}
@@ -82,6 +91,8 @@ export function MyGroupCard({
           )}
         </div>
       </div>
+
+      {showRules && <RulesAndScoringModal group={group} onClose={() => setShowRules(false)} />}
 
       {isLocked ? (
         <p className="text-sm text-gray-500">
