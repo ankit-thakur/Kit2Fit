@@ -24,12 +24,10 @@ function getClient(): BedrockRuntimeClient {
 }
 
 function buildPrompt(input: GoalContributionInput): string {
-  const metricDelta = input.newMetricValue - input.previousMetricValue;
   return `A user in a friendly fitness challenge has this goal: "${input.goalDescription}" (tracked in ${input.metricUnit}).
-Their metric changed from ${input.previousMetricValue} to ${input.newMetricValue} (delta: ${metricDelta}) ${input.metricUnit} today.
 Today's workout description: "${input.workoutDescription}"
 
-Decide whether today's workout DIRECTLY contributes to this specific goal (not just general fitness/health). For example, if the goal is a faster mile time, a run-specific workout like interval sprints directly contributes, but an unrelated workout like a weighted leg day does not, even though it may help indirectly.
+Decide whether today's workout activity itself DIRECTLY contributes to this specific goal (not just general fitness/health). Judge based on the activity type only — do not factor in any metric numbers, since metric progress toward the goal is scored separately. For example, if the goal is a faster mile time, a run-specific workout like interval sprints directly contributes, but an unrelated workout like a weighted leg day does not, even though it may help indirectly.
 
 Respond with ONLY a JSON object, no other text, in this exact shape:
 {"contributes": true or false, "reason": "one short sentence explaining why"}`;

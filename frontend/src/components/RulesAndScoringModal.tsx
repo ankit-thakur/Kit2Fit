@@ -41,7 +41,10 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
           <p>
             +1 point per {MINUTES_PER_POINT} minutes worked out, up to {MAX_DURATION_POINTS} points/day.
           </p>
-          <p>+1 bonus point if today's workout directly contributes to your goal (judged by AI).</p>
+          <p>
+            +1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your
+            target (judged by AI + your numbers).
+          </p>
           <p>+1 bonus point if today's workout matches an active group challenge.</p>
         </div>
 
