@@ -27,7 +27,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
   });
   const [memberEmail, setMemberEmail] = useState('');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [challengeForm, setChallengeForm] = useState({ description: '', keywords: '', activeDate: '' });
+  const [challengeForm, setChallengeForm] = useState({ description: '', keywords: '', startDate: '', endDate: '' });
 
   async function refresh() {
     setIsLoading(true);
@@ -104,9 +104,10 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
       await createChallenge(groupId, {
         description: challengeForm.description,
         keywords: challengeForm.keywords.split(',').map((k) => k.trim()).filter(Boolean),
-        activeDate: challengeForm.activeDate,
+        startDate: challengeForm.startDate,
+        endDate: challengeForm.endDate,
       });
-      setChallengeForm({ description: '', keywords: '', activeDate: '' });
+      setChallengeForm({ description: '', keywords: '', startDate: '', endDate: '' });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create challenge');
@@ -219,7 +220,11 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
             {challenges.map((challenge) => (
               <div key={challenge.challengeId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
                 <span className="text-sm text-gray-700">
-                  {challenge.description} ({challenge.activeDate}) — {challenge.keywords.join(', ')}
+                  {challenge.description} (
+                  {challenge.startDate === challenge.endDate
+                    ? challenge.startDate
+                    : `${challenge.startDate} → ${challenge.endDate}`}
+                  ) — {challenge.keywords.join(', ')}
                 </span>
                 <button onClick={() => handleDeleteChallenge(challenge.challengeId)} className="text-xs text-red-500">
                   Delete
@@ -241,13 +246,28 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 onChange={(e) => setChallengeForm((p) => ({ ...p, keywords: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
-              <input
-                required
-                type="date"
-                value={challengeForm.activeDate}
-                onChange={(e) => setChallengeForm((p) => ({ ...p, activeDate: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-              />
+              <div className="flex gap-2">
+                <label className="flex-1 text-xs text-gray-500">
+                  Start date
+                  <input
+                    required
+                    type="date"
+                    value={challengeForm.startDate}
+                    onChange={(e) => setChallengeForm((p) => ({ ...p, startDate: e.target.value }))}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                  />
+                </label>
+                <label className="flex-1 text-xs text-gray-500">
+                  End date
+                  <input
+                    required
+                    type="date"
+                    value={challengeForm.endDate}
+                    onChange={(e) => setChallengeForm((p) => ({ ...p, endDate: e.target.value }))}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                  />
+                </label>
+              </div>
               <button type="submit" className="w-full rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark">
                 Add challenge
               </button>

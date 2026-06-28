@@ -16,9 +16,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await requireAdmin(groupId, userId);
 
     const body = JSON.parse(event.body ?? '{}');
-    const { description, keywords, activeDate } = body;
-    if (!description || !Array.isArray(keywords) || keywords.length === 0 || !activeDate) {
-      throw new HttpError(400, 'description, keywords (non-empty array), and activeDate are required');
+    const { description, keywords, startDate, endDate } = body;
+    if (!description || !Array.isArray(keywords) || keywords.length === 0 || !startDate || !endDate) {
+      throw new HttpError(400, 'description, keywords (non-empty array), startDate, and endDate are required');
+    }
+    if (startDate > endDate) {
+      throw new HttpError(400, 'startDate must be on or before endDate');
     }
 
     const challengeId = randomUUID();
@@ -32,13 +35,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           challengeId,
           description,
           keywords,
-          activeDate,
+          startDate,
+          endDate,
           createdBy: userId,
           createdAt: now,
         },
       }),
     );
 
-    return json(201, { groupId, challengeId, description, keywords, activeDate });
+    return json(201, { groupId, challengeId, description, keywords, startDate, endDate });
   });
 }

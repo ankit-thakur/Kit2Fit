@@ -7,11 +7,18 @@ interface ChallengeWithGroup {
   groupName: string;
   challengeId: string;
   description: string;
-  activeDate: string;
+  startDate: string;
+  endDate: string;
 }
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function formatWindow(startDate: string, endDate: string): string {
+  const today = todayIso();
+  if (startDate === endDate) return 'Today';
+  return endDate === today ? 'Last day' : `Through ${endDate}`;
 }
 
 export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
@@ -32,7 +39,8 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
             groupName: group.name,
             challengeId: challenge.challengeId,
             description: challenge.description,
-            activeDate: challenge.activeDate,
+            startDate: challenge.startDate,
+            endDate: challenge.endDate,
           })),
         ),
       ),
@@ -79,7 +87,8 @@ export function ChallengeBanner({ groups }: { groups: MyGroup[] }) {
                 <div key={`${challenge.groupId}-${challenge.challengeId}`} className="rounded-lg bg-gray-50 p-3">
                   <p className="text-sm font-semibold text-charcoal">{challenge.description}</p>
                   <p className="text-xs text-gray-400">
-                    Today{showGroupName ? ` · ${challenge.groupName}` : ''}
+                    {formatWindow(challenge.startDate, challenge.endDate)}
+                    {showGroupName ? ` · ${challenge.groupName}` : ''}
                   </p>
                 </div>
               ))}

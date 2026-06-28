@@ -15,7 +15,7 @@ export async function matchAdhocChallenge(
     new QueryCommand({
       TableName: Tables.adhocChallenges,
       KeyConditionExpression: 'groupId = :groupId',
-      FilterExpression: 'activeDate = :date',
+      FilterExpression: 'startDate <= :date AND endDate >= :date',
       ExpressionAttributeValues: { ':groupId': groupId, ':date': date },
     }),
   );

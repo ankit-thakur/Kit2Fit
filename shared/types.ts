@@ -56,7 +56,8 @@ export interface AdhocChallenge {
   challengeId: string;
   keywords: string[];
   description: string;
-  activeDate: string;
+  startDate: string;
+  endDate: string;
   createdBy: string;
   createdAt: string;
 }

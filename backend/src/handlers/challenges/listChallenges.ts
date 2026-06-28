@@ -14,16 +14,16 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     await requireMembership(groupId, userId);
 
-    const activeDate = event.queryStringParameters?.date;
+    const onDate = event.queryStringParameters?.date;
 
     const { Items: challenges = [] } = await ddb.send(
       new QueryCommand({
         TableName: Tables.adhocChallenges,
         KeyConditionExpression: 'groupId = :groupId',
-        ...(activeDate
+        ...(onDate
           ? {
-              FilterExpression: 'activeDate = :date',
-              ExpressionAttributeValues: { ':groupId': groupId, ':date': activeDate },
+              FilterExpression: 'startDate <= :date AND endDate >= :date',
+              ExpressionAttributeValues: { ':groupId': groupId, ':date': onDate },
             }
           : { ExpressionAttributeValues: { ':groupId': groupId } }),
       }),

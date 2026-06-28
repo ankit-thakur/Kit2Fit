@@ -10,7 +10,8 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listChallenges(group.groupId)
+    const today = new Date().toISOString().slice(0, 10);
+    listChallenges(group.groupId, today)
       .then((res) => setChallenges(res.challenges))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load challenges'))
       .finally(() => setIsLoading(false));
@@ -55,7 +56,11 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
           ) : (
             challenges.map((challenge) => (
               <div key={challenge.challengeId} className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">
-                {challenge.description} ({challenge.activeDate})
+                {challenge.description} (
+                {challenge.startDate === challenge.endDate
+                  ? challenge.startDate
+                  : `${challenge.startDate} → ${challenge.endDate}`}
+                )
               </div>
             ))
           )}
