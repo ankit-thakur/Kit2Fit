@@ -97,7 +97,22 @@ export function LogScreen() {
         }),
       ),
     );
-    setResults({});
+    setResults(
+      Object.fromEntries(
+        groups.flatMap((g) => {
+          const log = logsByGroup[g.groupId]?.[selectedDate];
+          if (!log) return [];
+          return [[g.groupId, {
+            date: selectedDate,
+            durationPoints: log.durationPoints,
+            llmBonusPoint: log.llmBonusPoint,
+            llmBonusReason: log.llmBonusReason,
+            adhocBonusPoint: log.adhocBonusPoint,
+            totalPointsForDay: log.totalPointsForDay,
+          }]];
+        }),
+      ),
+    );
     setErrors({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, groups]);
