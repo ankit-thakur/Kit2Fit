@@ -4,6 +4,7 @@ import { getLeaderboard, getProgress, type LeaderboardEntry, type ProgressEntry 
 import { LeaderboardChart } from '../components/LeaderboardChart';
 import { ProgressLineChart } from '../components/ProgressLineChart';
 import { GroupDashboardWidget } from '../components/GroupDashboardWidget';
+import { RulesAndScoringModal } from '../components/RulesAndScoringModal';
 
 const WIDGET_STACK_MAX_GROUPS = 3;
 
@@ -13,6 +14,8 @@ function SingleGroupDashboard({ groups }: { groups: MyGroup[] }) {
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showRules, setShowRules] = useState(false);
+  const selectedGroup = groups.find((g) => g.groupId === selectedGroupId)!;
 
   useEffect(() => {
     setIsLoading(true);
@@ -27,17 +30,28 @@ function SingleGroupDashboard({ groups }: { groups: MyGroup[] }) {
 
   return (
     <div className="space-y-4">
-      <select
-        value={selectedGroupId}
-        onChange={(e) => setSelectedGroupId(e.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm"
-      >
-        {groups.map((group) => (
-          <option key={group.groupId} value={group.groupId}>
-            {group.name}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center gap-2">
+        <select
+          value={selectedGroupId}
+          onChange={(e) => setSelectedGroupId(e.target.value)}
+          className="flex-1 rounded-lg border border-gray-300 px-2 py-1 text-sm"
+        >
+          {groups.map((group) => (
+            <option key={group.groupId} value={group.groupId}>
+              {group.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => setShowRules(true)}
+          aria-label="Rules & scoring"
+          className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 text-xs font-bold text-gray-400"
+        >
+          i
+        </button>
+      </div>
+
+      {showRules && <RulesAndScoringModal group={selectedGroup} onClose={() => setShowRules(false)} />}
 
       {error && <p className="text-center text-red-500">{error}</p>}
 

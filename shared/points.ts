@@ -1,5 +1,5 @@
-const MAX_DURATION_POINTS = 6;
-const MINUTES_PER_POINT = 15;
+export const MAX_DURATION_POINTS = 6;
+export const MINUTES_PER_POINT = 15;
 
 export function calculateDurationPoints(minutes: number): number {
   const safeMinutes = Math.max(0, minutes);

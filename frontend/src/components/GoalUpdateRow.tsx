@@ -34,11 +34,27 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
       </div>
 
       {result && (
-        <p className="mt-2 text-sm text-green-600">
-          {result.durationPoints} pts duration
-          {result.llmBonusPoint ? ` + 1 pt goal bonus (${result.llmBonusReason})` : ''}
-          {result.adhocBonusPoint ? ' + 1 pt challenge bonus' : ''} = {result.totalPointsForDay} pts
-        </p>
+        <div className="mt-3 space-y-1 text-sm">
+          <div className="flex items-center justify-between text-gray-600">
+            <span>Duration</span>
+            <span className="font-semibold">+{result.durationPoints}</span>
+          </div>
+          <div>
+            <div className="flex items-center justify-between text-gray-600">
+              <span>Goal bonus</span>
+              <span className="font-semibold">+{result.llmBonusPoint}</span>
+            </div>
+            {result.llmBonusPoint === 1 && <p className="text-xs text-gray-400">{result.llmBonusReason}</p>}
+          </div>
+          <div className="flex items-center justify-between text-gray-600">
+            <span>Challenge bonus</span>
+            <span className="font-semibold">+{result.adhocBonusPoint}</span>
+          </div>
+          <div className="flex items-center justify-between border-t border-gray-200 pt-1 font-bold text-green-600">
+            <span>Total</span>
+            <span>{result.totalPointsForDay}</span>
+          </div>
+        </div>
       )}
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
