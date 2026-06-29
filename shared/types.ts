@@ -35,6 +35,7 @@ export interface GroupMembership {
   metricUnit: string;
   totalPoints: number;
   goalLockedAt?: string;
+  onboardedAt?: string;
 }
 
 export interface DailyLog {

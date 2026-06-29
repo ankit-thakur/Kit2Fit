@@ -35,6 +35,10 @@ export function removeMember(groupId: string, userId: string): Promise<void> {
   return apiRequest('DELETE', `/groups/${groupId}/members/${userId}`);
 }
 
+export function completeOnboarding(groupId: string, userId: string): Promise<GroupMembership> {
+  return apiRequest('PUT', `/groups/${groupId}/members/${userId}/onboarding`);
+}
+
 export interface UpdateGoalInput {
   goalCategory?: GoalCategory;
   goalDescription?: string;
