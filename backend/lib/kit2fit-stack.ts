@@ -88,15 +88,14 @@ export class Kit2FitStack extends cdk.Stack {
       signInAliases: { email: true },
       autoVerify: { email: true },
       standardAttributes: {
-        phoneNumber: { required: false, mutable: true },
         fullname: { required: false, mutable: true },
         nickname: { required: false, mutable: true },
       },
       passwordPolicy: {
-        minLength: 8,
+        minLength: 5,
         requireLowercase: true,
         requireUppercase: false,
-        requireDigits: true,
+        requireDigits: false,
         requireSymbols: false,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
@@ -133,7 +132,7 @@ export class Kit2FitStack extends cdk.Stack {
     });
 
     // --- Bedrock (LLM goal judge) ---
-    const bedrockModelId = 'anthropic.claude-3-5-haiku-20241022-v1:0';
+    const bedrockModelId = 'anthropic.claude-haiku-4-5-20251001-v1:0';
     const bedrockInvokePolicy = new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel'],
       resources: [
