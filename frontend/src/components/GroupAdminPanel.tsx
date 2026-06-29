@@ -27,7 +27,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
   });
   const [memberEmail, setMemberEmail] = useState('');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [challengeForm, setChallengeForm] = useState({ description: '', keywords: '', startDate: '', endDate: '' });
+  const [challengeForm, setChallengeForm] = useState({ description: '', startDate: '', endDate: '' });
 
   async function refresh() {
     setIsLoading(true);
@@ -103,11 +103,10 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
     try {
       await createChallenge(groupId, {
         description: challengeForm.description,
-        keywords: challengeForm.keywords.split(',').map((k) => k.trim()).filter(Boolean),
         startDate: challengeForm.startDate,
         endDate: challengeForm.endDate,
       });
-      setChallengeForm({ description: '', keywords: '', startDate: '', endDate: '' });
+      setChallengeForm({ description: '', startDate: '', endDate: '' });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create challenge');
@@ -224,7 +223,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                   {challenge.startDate === challenge.endDate
                     ? challenge.startDate
                     : `${challenge.startDate} → ${challenge.endDate}`}
-                  ) — {challenge.keywords.join(', ')}
+                  )
                 </span>
                 <button onClick={() => handleDeleteChallenge(challenge.challengeId)} className="text-xs text-red-500">
                   Delete
@@ -237,13 +236,6 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 placeholder="Description (e.g. Burpee Tuesday)"
                 value={challengeForm.description}
                 onChange={(e) => setChallengeForm((p) => ({ ...p, description: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-              />
-              <input
-                required
-                placeholder="Keywords, comma separated (e.g. jump rope, skip)"
-                value={challengeForm.keywords}
-                onChange={(e) => setChallengeForm((p) => ({ ...p, keywords: e.target.value }))}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
               />
               <div className="flex gap-2">

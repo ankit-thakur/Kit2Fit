@@ -1,5 +1,6 @@
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { ddb, Tables } from './dynamo';
+import { judgeChallengeMatch } from './llmJudge';
 
 export interface AdhocMatchResult {
   matched: boolean;
@@ -20,12 +21,14 @@ export async function matchAdhocChallenge(
     }),
   );
 
-  const lowerDescription = description.toLowerCase();
-  const match = challenges.find((challenge) =>
-    (challenge.keywords as string[]).some((keyword) =>
-      lowerDescription.includes(keyword.toLowerCase()),
-    ),
-  );
+  if (challenges.length === 0) {
+    return { matched: false };
+  }
 
-  return match ? { matched: true, challengeId: match.challengeId } : { matched: false };
+  const result = await judgeChallengeMatch({
+    workoutDescription: description,
+    challenges: challenges.map((c) => ({ challengeId: c.challengeId, description: c.description })),
+  });
+
+  return result.matched ? { matched: true, challengeId: result.challengeId } : { matched: false };
 }

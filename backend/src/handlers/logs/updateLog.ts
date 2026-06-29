@@ -34,20 +34,31 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const metricValueAfter = body.metricValueAfter ?? existingLog.metricValueAfter;
 
     const durationPoints = calculateDurationPoints(minutesWorkedOut);
+    const previousMetricValue = membership.currentMetricValue ?? 0;
 
     const [judgeResult, adhocResult, isBackfill] = await Promise.all([
       judgeGoalContribution({
         workoutDescription: description,
         goalDescription: membership.goalDescription ?? '',
         metricUnit: membership.metricUnit ?? '',
-        previousMetricValue: membership.currentMetricValue ?? 0,
+        previousMetricValue,
         newMetricValue: metricValueAfter,
       }),
       matchAdhocChallenge(groupId, date, description),
       hasLaterLog(groupIdUserId, date),
     ]);
 
-    const llmBonusPoint = judgeResult.contributes ? 1 : 0;
+    const metricMovedFavorably =
+      typeof membership.targetMetricValue === 'number' &&
+      Math.abs(membership.targetMetricValue - metricValueAfter) <
+        Math.abs(membership.targetMetricValue - previousMetricValue);
+
+    const llmBonusPoint = judgeResult.contributes || metricMovedFavorably ? 1 : 0;
+    const llmBonusReason = judgeResult.contributes
+      ? judgeResult.reason
+      : metricMovedFavorably
+        ? `Your ${membership.metricUnit ?? 'metric'} moved from ${previousMetricValue} to ${metricValueAfter}, trending toward your goal.`
+        : judgeResult.reason;
     const adhocBonusPoint = adhocResult.matched ? 1 : 0;
     const totalPointsForDay = calculateTotalPoints(durationPoints, llmBonusPoint, adhocBonusPoint);
     const pointsDelta = totalPointsForDay - existingLog.totalPointsForDay;
@@ -63,7 +74,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           metricValueAfter,
           durationPoints,
           llmBonusPoint,
-          llmBonusReason: judgeResult.reason,
+          llmBonusReason,
           adhocBonusPoint,
           adhocChallengeId: adhocResult.challengeId,
           totalPointsForDay,
@@ -89,7 +100,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       date,
       durationPoints,
       llmBonusPoint,
-      llmBonusReason: judgeResult.reason,
+      llmBonusReason,
       adhocBonusPoint,
       totalPointsForDay,
     });

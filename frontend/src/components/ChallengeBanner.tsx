@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MyGroup } from '../api/groups';
 import { listChallenges } from '../api/groups';
+import { today as localToday } from '../lib/date';
 
 interface ChallengeWithGroup {
   groupId: string;
@@ -12,7 +13,7 @@ interface ChallengeWithGroup {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localToday();
 }
 
 function formatWindow(startDate: string, endDate: string): string {

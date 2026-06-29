@@ -62,7 +62,6 @@ export function joinViaInvite(token: string): Promise<{ groupId: string; already
 
 export interface CreateChallengeInput {
   description: string;
-  keywords: string[];
   startDate: string;
   endDate: string;
 }
