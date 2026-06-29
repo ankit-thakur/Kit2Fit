@@ -1,3 +1,5 @@
+import type { GoalCategory } from './goalCategories';
+
 export interface User {
   userId: string;
   email: string;
@@ -25,6 +27,7 @@ export interface GroupMembership {
   userId: string;
   role: GroupRole;
   joinedAt: string;
+  goalCategory?: GoalCategory;
   goalDescription: string;
   startingMetricValue: number;
   targetMetricValue: number;

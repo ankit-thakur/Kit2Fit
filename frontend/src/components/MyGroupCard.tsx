@@ -4,6 +4,7 @@ import { updateMemberGoal, removeMember } from '../api/groups';
 import { GroupAdminPanel } from './GroupAdminPanel';
 import { RulesAndScoringModal } from './RulesAndScoringModal';
 import { calculateGoalProgressPercent } from '@shared/progress';
+import { GOAL_CATEGORY_OPTIONS, type GoalCategory } from '@shared/goalCategories';
 
 export function MyGroupCard({
   group,
@@ -24,7 +25,7 @@ export function MyGroupCard({
     goalDescription: membership.goalDescription,
     currentMetricValue: String(membership.currentMetricValue),
     targetMetricValue: String(membership.targetMetricValue),
-    metricUnit: membership.metricUnit,
+    goalCategory: membership.goalCategory ?? '',
   });
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,6 +37,10 @@ export function MyGroupCard({
   );
 
   async function handleSaveGoal() {
+    if (!goalForm.goalCategory) {
+      setError('Please select a goal category');
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -43,7 +48,7 @@ export function MyGroupCard({
         goalDescription: goalForm.goalDescription,
         currentMetricValue: Number(goalForm.currentMetricValue),
         targetMetricValue: Number(goalForm.targetMetricValue),
-        metricUnit: goalForm.metricUnit,
+        goalCategory: goalForm.goalCategory as GoalCategory,
       });
       onChanged();
     } catch (err) {
@@ -126,12 +131,20 @@ export function MyGroupCard({
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
-          <input
-            placeholder="Unit (lbs, min, etc)"
-            value={goalForm.metricUnit}
-            onChange={(e) => setGoalForm((p) => ({ ...p, metricUnit: e.target.value }))}
+          <select
+            value={goalForm.goalCategory}
+            onChange={(e) => setGoalForm((p) => ({ ...p, goalCategory: e.target.value }))}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
+          >
+            <option value="" disabled>
+              Select a goal category
+            </option>
+            {GOAL_CATEGORY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label} ({opt.metricUnit})
+              </option>
+            ))}
+          </select>
           <button
             onClick={handleSaveGoal}
             disabled={isSaving}
