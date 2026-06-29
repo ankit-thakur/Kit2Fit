@@ -133,7 +133,7 @@ export class Kit2FitStack extends cdk.Stack {
     });
 
     // --- Bedrock (LLM goal judge) ---
-    const bedrockModelId = 'anthropic.claude-3-haiku-20240307-v1:0';
+    const bedrockModelId = 'anthropic.claude-3-5-haiku-20241022-v1:0';
     const bedrockInvokePolicy = new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel'],
       resources: [
