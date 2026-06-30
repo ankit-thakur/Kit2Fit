@@ -1,13 +1,22 @@
-const mockSend = jest.fn();
+const mockCreate = jest.fn();
 
-jest.mock('@aws-sdk/client-bedrock-runtime', () => {
+jest.mock('@anthropic-ai/sdk', () => {
   return {
-    BedrockRuntimeClient: jest.fn().mockImplementation(() => ({
-      send: mockSend,
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => ({
+      messages: { create: mockCreate },
     })),
-    ConverseCommand: jest.fn().mockImplementation((input) => input),
   };
 });
+
+jest.mock('@aws-sdk/client-secrets-manager', () => ({
+  SecretsManagerClient: jest.fn().mockImplementation(() => ({
+    send: jest.fn().mockResolvedValue({ SecretString: 'test-api-key' }),
+  })),
+  GetSecretValueCommand: jest.fn().mockImplementation((input) => input),
+}));
+
+process.env.ANTHROPIC_SECRET_NAME = 'test-secret';
 
 import {
   judgeGoalContribution,
@@ -16,13 +25,9 @@ import {
   parseChallengeMatchResponse,
 } from '../src/lib/llmJudge';
 
-function converseResponse(text: string | null) {
+function anthropicResponse(text: string | null) {
   return {
-    output: {
-      message: {
-        content: text !== null ? [{ text }] : [],
-      },
-    },
+    content: text !== null ? [{ type: 'text', text }] : [],
   };
 }
 
@@ -58,7 +63,7 @@ describe('parseJudgeResponse', () => {
 
 describe('judgeGoalContribution', () => {
   beforeEach(() => {
-    mockSend.mockReset();
+    mockCreate.mockReset();
   });
 
   const input = {
@@ -70,8 +75,8 @@ describe('judgeGoalContribution', () => {
   };
 
   it('returns the parsed result on a successful API call', async () => {
-    mockSend.mockResolvedValue(
-      converseResponse('{"contributes": true, "reason": "Direct sprint work."}'),
+    mockCreate.mockResolvedValue(
+      anthropicResponse('{"contributes": true, "reason": "Direct sprint work."}'),
     );
 
     const result = await judgeGoalContribution(input);
@@ -79,7 +84,7 @@ describe('judgeGoalContribution', () => {
   });
 
   it('falls back to contributes: false when the API call throws', async () => {
-    mockSend.mockRejectedValue(new Error('network error'));
+    mockCreate.mockRejectedValue(new Error('network error'));
 
     const result = await judgeGoalContribution(input);
     expect(result).toEqual({
@@ -89,7 +94,7 @@ describe('judgeGoalContribution', () => {
   });
 
   it('falls back to contributes: false when the response has no text block', async () => {
-    mockSend.mockResolvedValue(converseResponse(null));
+    mockCreate.mockResolvedValue(anthropicResponse(null));
 
     const result = await judgeGoalContribution(input);
     expect(result).toEqual({
@@ -142,20 +147,20 @@ describe('parseChallengeMatchResponse', () => {
 
 describe('judgeChallengeMatch', () => {
   beforeEach(() => {
-    mockSend.mockReset();
+    mockCreate.mockReset();
   });
 
   const challenges = [{ challengeId: 'challenge-1', description: 'Do 20 pushups' }];
 
-  it('returns matched: false without calling Bedrock when there are no candidate challenges', async () => {
+  it('returns matched: false without calling the API when there are no candidate challenges', async () => {
     const result = await judgeChallengeMatch({ workoutDescription: 'Ran 3 miles', challenges: [] });
     expect(result).toEqual({ matched: false });
-    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it('returns the parsed result on a successful API call', async () => {
-    mockSend.mockResolvedValue(
-      converseResponse('{"matched": true, "challengeId": "challenge-1", "reason": "Did 20 pushups."}'),
+    mockCreate.mockResolvedValue(
+      anthropicResponse('{"matched": true, "challengeId": "challenge-1", "reason": "Did 20 pushups."}'),
     );
 
     const result = await judgeChallengeMatch({
@@ -166,7 +171,7 @@ describe('judgeChallengeMatch', () => {
   });
 
   it('falls back to matched: false when the API call throws', async () => {
-    mockSend.mockRejectedValue(new Error('network error'));
+    mockCreate.mockRejectedValue(new Error('network error'));
 
     const result = await judgeChallengeMatch({ workoutDescription: 'Ran 3 miles', challenges });
     expect(result).toEqual({ matched: false });

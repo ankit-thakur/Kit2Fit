@@ -7,7 +7,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import * as iam from 'aws-cdk-lib/aws-iam';
+
 
 export class Kit2FitStack extends cdk.Stack {
   public readonly usersTable: dynamodb.Table;
@@ -92,7 +92,7 @@ export class Kit2FitStack extends cdk.Stack {
         nickname: { required: false, mutable: true },
       },
       passwordPolicy: {
-        minLength: 5,
+        minLength: 6,
         requireLowercase: true,
         requireUppercase: false,
         requireDigits: false,
@@ -131,13 +131,12 @@ export class Kit2FitStack extends cdk.Stack {
       generateSecretString: { excludePunctuation: true, passwordLength: 48 },
     });
 
-    // --- Bedrock (LLM goal judge) ---
-    const bedrockModelId = 'amazon.nova-micro-v1:0';
-    const bedrockInvokePolicy = new iam.PolicyStatement({
-      actions: ['bedrock:InvokeModel'],
-      resources: [
-        `arn:aws:bedrock:${this.region}::foundation-model/${bedrockModelId}`,
-      ],
+    // --- Anthropic API key (LLM goal judge) ---
+    // CDK creates this secret on first deploy. After deploying, set the value
+    // manually in AWS Secrets Manager console — CDK will never overwrite it.
+    const anthropicApiKeySecret = new secretsmanager.Secret(this, 'AnthropicApiKeySecret', {
+      secretName: 'kit2fit/anthropic-api-key',
+      description: 'Anthropic API key used by the LLM goal and challenge judge',
     });
 
     const tableEnv = {
@@ -231,24 +230,22 @@ export class Kit2FitStack extends cdk.Stack {
     inviteLinkSecret.grantRead(joinViaInviteFn);
 
     // --- Logs domain ---
-    const createLogFn = mkFn('CreateLogFn', 'src/handlers/logs/createLog.ts', {
-      BEDROCK_MODEL_ID: bedrockModelId,
-    });
+    const llmEnv = { ANTHROPIC_SECRET_NAME: anthropicApiKeySecret.secretName };
+
+    const createLogFn = mkFn('CreateLogFn', 'src/handlers/logs/createLog.ts', llmEnv);
     this.dailyLogsTable.grantReadWriteData(createLogFn);
     this.groupMembershipsTable.grantReadWriteData(createLogFn);
     this.adhocChallengesTable.grantReadData(createLogFn);
-    createLogFn.addToRolePolicy(bedrockInvokePolicy);
+    anthropicApiKeySecret.grantRead(createLogFn);
 
     const listMyLogsFn = mkFn('ListMyLogsFn', 'src/handlers/logs/listMyLogs.ts');
     this.dailyLogsTable.grantReadData(listMyLogsFn);
 
-    const updateLogFn = mkFn('UpdateLogFn', 'src/handlers/logs/updateLog.ts', {
-      BEDROCK_MODEL_ID: bedrockModelId,
-    });
+    const updateLogFn = mkFn('UpdateLogFn', 'src/handlers/logs/updateLog.ts', llmEnv);
     this.dailyLogsTable.grantReadWriteData(updateLogFn);
     this.groupMembershipsTable.grantReadWriteData(updateLogFn);
     this.adhocChallengesTable.grantReadData(updateLogFn);
-    updateLogFn.addToRolePolicy(bedrockInvokePolicy);
+    anthropicApiKeySecret.grantRead(updateLogFn);
 
     // --- Ad-hoc challenges domain ---
     const createChallengeFn = mkFn(

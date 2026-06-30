@@ -1,4 +1,5 @@
-import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import Anthropic from '@anthropic-ai/sdk';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 export interface GoalContributionInput {
   workoutDescription: string;
@@ -29,14 +30,21 @@ export interface ChallengeMatchResult {
   reason?: string;
 }
 
-const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'amazon.nova-micro-v1:0';
+const MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001';
 
-let client: BedrockRuntimeClient | undefined;
-function getClient(): BedrockRuntimeClient {
-  if (!client) {
-    client = new BedrockRuntimeClient({});
-  }
-  return client;
+let anthropicClient: Anthropic | undefined;
+const secretsClient = new SecretsManagerClient({});
+
+async function getClient(): Promise<Anthropic> {
+  if (anthropicClient) return anthropicClient;
+  const secretName = process.env.ANTHROPIC_SECRET_NAME;
+  if (!secretName) throw new Error('ANTHROPIC_SECRET_NAME env var not set');
+  const { SecretString } = await secretsClient.send(
+    new GetSecretValueCommand({ SecretId: secretName }),
+  );
+  if (!SecretString) throw new Error('Anthropic API key secret is empty');
+  anthropicClient = new Anthropic({ apiKey: SecretString });
+  return anthropicClient;
 }
 
 function buildPrompt(input: GoalContributionInput): string {
@@ -53,15 +61,15 @@ export async function judgeGoalContribution(
   input: GoalContributionInput,
 ): Promise<GoalContributionResult> {
   try {
-    const response = await getClient().send(new ConverseCommand({
-      modelId: MODEL_ID,
-      messages: [{ role: 'user', content: [{ text: buildPrompt(input) }] }],
-      inferenceConfig: { maxTokens: 200, temperature: 0 },
-    }));
-
-    const text = response.output?.message?.content?.[0]?.text;
-    if (!text) throw new Error('No text content in LLM response');
-    return parseJudgeResponse(text);
+    const client = await getClient();
+    const message = await client.messages.create({
+      model: MODEL,
+      max_tokens: 200,
+      messages: [{ role: 'user', content: buildPrompt(input) }],
+    });
+    const block = message.content.find((b) => b.type === 'text');
+    if (!block || block.type !== 'text') throw new Error('No text block in response');
+    return parseJudgeResponse(block.text);
   } catch (err) {
     console.error('LLM goal judge failed, defaulting to no bonus', err);
     return { contributes: false, reason: 'Unable to evaluate goal contribution' };
@@ -89,15 +97,15 @@ export async function judgeChallengeMatch(input: ChallengeMatchInput): Promise<C
   }
 
   try {
-    const response = await getClient().send(new ConverseCommand({
-      modelId: MODEL_ID,
-      messages: [{ role: 'user', content: [{ text: buildChallengePrompt(input) }] }],
-      inferenceConfig: { maxTokens: 200, temperature: 0 },
-    }));
-
-    const text = response.output?.message?.content?.[0]?.text;
-    if (!text) throw new Error('No text content in LLM response');
-    return parseChallengeMatchResponse(text, input.challenges);
+    const client = await getClient();
+    const message = await client.messages.create({
+      model: MODEL,
+      max_tokens: 200,
+      messages: [{ role: 'user', content: buildChallengePrompt(input) }],
+    });
+    const block = message.content.find((b) => b.type === 'text');
+    if (!block || block.type !== 'text') throw new Error('No text block in response');
+    return parseChallengeMatchResponse(block.text, input.challenges);
   } catch (err) {
     console.error('LLM challenge judge failed, defaulting to no match', err);
     return { matched: false };
