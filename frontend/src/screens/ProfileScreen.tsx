@@ -128,7 +128,7 @@ export function ProfileScreen() {
         </div>
       )}
 
-      <h2 className="font-display text-lg font-bold text-charcoal">Your groups (use them or lose them)</h2>
+      <h2 className="font-display text-lg font-bold text-charcoal">Your groups (aka your ops)</h2>
       {me &&
         groups.map((group) => (
           <MyGroupCard key={group.groupId} group={group} currentUserId={me.userId} onChanged={refresh} />

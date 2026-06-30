@@ -221,7 +221,7 @@ export class Kit2FitStack extends cdk.Stack {
     const createInviteLinkFn = mkFn(
       'CreateInviteLinkFn',
       'src/handlers/groups/createInviteLink.ts',
-      { INVITE_LINK_SECRET_ARN: inviteLinkSecret.secretArn, APP_BASE_URL: 'https://ea55cc1a.kit2fit.pages.dev' },
+      { INVITE_LINK_SECRET_ARN: inviteLinkSecret.secretArn, APP_BASE_URL: 'https://kit2fit.pages.dev' },
     );
     this.groupMembershipsTable.grantReadData(createInviteLinkFn);
     inviteLinkSecret.grantRead(createInviteLinkFn);

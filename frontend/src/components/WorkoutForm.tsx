@@ -45,7 +45,7 @@ export function WorkoutForm({
         <span className="text-lg font-bold text-teal-dark">{previewPoints}</span>
       </div>
       <p className="mt-2 text-xs text-gray-400">
-        Bonus points land after you hit submit. We're thorough, not psychic.
+        Bonus points calculated after submission.
       </p>
     </div>
   );

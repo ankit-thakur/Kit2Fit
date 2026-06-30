@@ -209,7 +209,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
               <>
                 <p className="break-all rounded-lg bg-gray-50 p-2 text-xs text-gray-600">{inviteUrl}</p>
                 <p className="text-xs text-gray-400">
-                  Expires in 7 days. Don't be the one who waits 8.
+                  Expires in 7 days.
                 </p>
               </>
             )}
