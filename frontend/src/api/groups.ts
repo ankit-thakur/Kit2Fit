@@ -1,5 +1,6 @@
 import { apiRequest } from './client';
 import type { Group, GroupMembership, AdhocChallenge } from '@shared/types';
+import type { GoalCategory } from '@shared/goalCategories';
 
 export type MyGroup = Group & { membership: GroupMembership };
 
@@ -34,11 +35,15 @@ export function removeMember(groupId: string, userId: string): Promise<void> {
   return apiRequest('DELETE', `/groups/${groupId}/members/${userId}`);
 }
 
+export function completeOnboarding(groupId: string, userId: string): Promise<GroupMembership> {
+  return apiRequest('PUT', `/groups/${groupId}/members/${userId}/onboarding`);
+}
+
 export interface UpdateGoalInput {
+  goalCategory?: GoalCategory;
   goalDescription?: string;
   targetMetricValue?: number;
   currentMetricValue?: number;
-  metricUnit?: string;
 }
 
 export function updateMemberGoal(

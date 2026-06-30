@@ -132,7 +132,7 @@ export class Kit2FitStack extends cdk.Stack {
     });
 
     // --- Bedrock (LLM goal judge) ---
-    const bedrockModelId = 'anthropic.claude-haiku-4-5-20251001-v1:0';
+    const bedrockModelId = 'amazon.nova-micro-v1:0';
     const bedrockInvokePolicy = new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel'],
       resources: [
@@ -208,6 +208,12 @@ export class Kit2FitStack extends cdk.Stack {
     );
     this.groupMembershipsTable.grantReadWriteData(updateMemberGoalFn);
     this.groupsTable.grantReadData(updateMemberGoalFn);
+
+    const completeOnboardingFn = mkFn(
+      'CompleteOnboardingFn',
+      'src/handlers/groups/completeOnboarding.ts',
+    );
+    this.groupMembershipsTable.grantReadWriteData(completeOnboardingFn);
 
     const createInviteLinkFn = mkFn(
       'CreateInviteLinkFn',
@@ -314,6 +320,9 @@ export class Kit2FitStack extends cdk.Stack {
     const member = members.addResource('{userId}');
     member.addMethod('DELETE', new apigateway.LambdaIntegration(removeMemberFn), withAuth);
     member.addResource('goal').addMethod('PUT', new apigateway.LambdaIntegration(updateMemberGoalFn), withAuth);
+    member
+      .addResource('onboarding')
+      .addMethod('PUT', new apigateway.LambdaIntegration(completeOnboardingFn), withAuth);
 
     group.addResource('invite-link').addMethod(
       'POST',

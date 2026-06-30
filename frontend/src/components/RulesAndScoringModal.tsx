@@ -3,6 +3,7 @@ import { MAX_DURATION_POINTS, MINUTES_PER_POINT } from '@shared/points';
 import type { AdhocChallenge } from '@shared/types';
 import { listChallenges } from '../api/groups';
 import type { MyGroup } from '../api/groups';
+import { today } from '../lib/date';
 
 function formatDaysLeft(endDate: string): string {
   const today = new Date().toISOString().slice(0, 10);
@@ -18,8 +19,7 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    listChallenges(group.groupId, today)
+    listChallenges(group.groupId, today())
       .then((res) => setChallenges(res.challenges))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load challenges'))
       .finally(() => setIsLoading(false));
@@ -53,7 +53,7 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
             +1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your
             target (judged by AI + your numbers).
           </p>
-          <p>+1 bonus point if today's workout matches an active group challenge.</p>
+          <p>+1 bonus point if today's workout matches an active group challenge (judged by AI).</p>
         </div>
 
         <div className="space-y-2">

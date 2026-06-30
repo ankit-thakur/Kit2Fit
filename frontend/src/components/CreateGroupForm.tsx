@@ -46,7 +46,6 @@ export function CreateGroupForm({ onCreated }: { onCreated: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white p-4 shadow">
       <h3 className="font-display font-bold text-charcoal">Start a new group</h3>
-      <p className="text-xs text-gray-400">Pick people who'll actually show up.</p>
       <input
         required
         placeholder="Group name"

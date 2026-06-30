@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
 import { BottomNav } from './components/BottomNav';
+import { OnboardingGate } from './components/OnboardingGate';
 import { LoginScreen } from './screens/LoginScreen';
 import { SignupScreen } from './screens/SignupScreen';
 import { JoinScreen } from './screens/JoinScreen';
@@ -12,6 +13,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-cream pb-20">
       {children}
+      <OnboardingGate />
       <BottomNav />
     </div>
   );

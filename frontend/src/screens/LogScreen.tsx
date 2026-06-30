@@ -7,10 +7,7 @@ import { GoalUpdateRow } from '../components/GoalUpdateRow';
 import { WeekStrip, type DayStatus } from '../components/WeekStrip';
 import { ChallengeBanner } from '../components/ChallengeBanner';
 import { ApiError } from '../api/client';
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { localDateString, today } from '../lib/date';
 
 function weekDatesForOffset(offsetWeeks: number): string[] {
   const days: string[] = [];
@@ -18,7 +15,7 @@ function weekDatesForOffset(offsetWeeks: number): string[] {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i - offsetWeeks * 7);
-    days.push(d.toISOString().slice(0, 10));
+    days.push(localDateString(d));
   }
   return days;
 }

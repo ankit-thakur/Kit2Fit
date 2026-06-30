@@ -78,7 +78,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           ...(metricValueAfter !== null ? { metricValueAfter } : { metricValueAfter: undefined }),
           durationPoints,
           llmBonusPoint,
-          llmBonusReason: llmBonusReason,
+          llmBonusReason,
           adhocBonusPoint,
           adhocChallengeId: adhocResult.challengeId,
           totalPointsForDay,

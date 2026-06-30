@@ -169,7 +169,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
           </form>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-600">Members</h4>
+            <h4 className="text-sm font-semibold text-gray-600">Members (aka ops)</h4>
             {group.members.map((member) => (
               <div key={member.userId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
                 <span className="text-sm text-gray-700">
@@ -216,7 +216,7 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-600">Surprise challenges (organized chaos)</h4>
+            <h4 className="text-sm font-semibold text-gray-600">Surprise challenges (catch em slackin cuh)</h4>
             {challenges.map((challenge) => (
               <div key={challenge.challengeId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
                 <span className="text-sm text-gray-700">
@@ -255,7 +255,8 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                     type="date"
                     value={challengeForm.startDate}
                     onChange={(e) => setChallengeForm((p) => ({ ...p, startDate: e.target.value }))}
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                    // className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
                   />
                 </label>
                 <label className="min-w-0 flex-1 text-xs text-gray-500">
@@ -265,7 +266,8 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                     type="date"
                     value={challengeForm.endDate}
                     onChange={(e) => setChallengeForm((p) => ({ ...p, endDate: e.target.value }))}
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                    // className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
                   />
                 </label>
               </div>
