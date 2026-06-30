@@ -84,10 +84,17 @@ export function OnboardingFlow({
         {step === 'welcome' && (
           <div className="space-y-2 text-sm text-gray-600">
             <p>
-              Kit2Fit turns getting in shape into a friendly group competition. You and your group set a shared
-              challenge window, each pick a personal goal, and log workouts daily to rack up points.
+              Kit2Fit started because Kit was not fit, but he wanted to get fit.
             </p>
-            <p>Most active (and most consistent) wins bragging rights when the challenge ends.</p>
+            <p>
+              Who is Kit, you ask? Well he's an absolute fitness beast with like really big muscles and a twelve pack and can run really far... who just needs a little extra motivation sometimes. So he created a way to get fit with friends.
+            </p>
+            <p>
+              Compete against Kit and your friends to see who can get the most points by working out, achieving goals, and completing challenges.
+            </p>
+            <p>
+              Rack up the most points by the end of the challenge window to win! Even if you don't win, you'll (hopefully) be in better shape than when you started.
+            </p>
           </div>
         )}
 
@@ -98,6 +105,7 @@ export function OnboardingFlow({
             </p>
             <p>+1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your target.</p>
             <p>+1 bonus point if today's workout matches an active group challenge.</p>
+            <p>+1 bonus point if your score beats Kit's total for the day.</p>
           </div>
         )}
 
@@ -107,7 +115,10 @@ export function OnboardingFlow({
               Each day, log your workout on the Log screen: how long you worked out, a quick description of what you
               did, and today's value for whatever number you're tracking toward your goal.
             </p>
-            <p>We tally your points automatically from there — no manual math.</p>
+            <p>
+              If you completed an active group challenge, mention it in your description too.
+            </p>
+            <p>We tally your points automatically from there.</p>
           </div>
         )}
 
@@ -121,15 +132,11 @@ export function OnboardingFlow({
             ) : (
               <>
                 <p className="text-sm text-gray-600">
-                  Goals use a fixed set of categories so units stay consistent across your group:
+                  Goals should be measureable and achievable within the challenge window. Pick a goal category, set your starting and target values, and write a short description of your goal.
                 </p>
-                <ul className="space-y-1 text-xs text-gray-500">
-                  {GOAL_CATEGORY_OPTIONS.map((opt) => (
-                    <li key={opt.value}>
-                      <span className="font-semibold text-gray-600">{opt.label}</span> · tracked in {opt.metricUnit}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm text-gray-600">
+                  For example, if your goal is to lose weight, pick the "Weight management" category, set your starting and target weights, and write a description like "Lose 10 pounds by the end of the challenge."
+                </p>
                 <input
                   placeholder="Goal description"
                   value={goalForm.goalDescription}

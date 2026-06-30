@@ -14,6 +14,7 @@ export interface CreateLogResult {
   llmBonusPoint: 0 | 1;
   llmBonusReason: string;
   adhocBonusPoint: 0 | 1;
+  kitBonusPoint: 0 | 1;
   totalPointsForDay: number;
 }
 

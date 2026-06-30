@@ -50,6 +50,7 @@ export interface DailyLog {
   llmBonusReason: string;
   adhocBonusPoint: 0 | 1;
   adhocChallengeId?: string;
+  kitBonusPoint: 0 | 1;
   totalPointsForDay: number;
   createdAt: string;
   updatedAt: string;

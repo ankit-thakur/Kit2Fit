@@ -139,6 +139,10 @@ export class Kit2FitStack extends cdk.Stack {
       description: 'Anthropic API key used by the LLM goal and challenge judge',
     });
 
+    // Kit's Cognito sub (userId). Set this in cdk.json context after Kit's first sign-up,
+    // then redeploy. Used to auto-add Kit to new groups and compute the Kit bonus.
+    const kitUserId = (this.node.tryGetContext('kitUserId') as string | undefined) ?? '';
+
     const tableEnv = {
       USERS_TABLE: this.usersTable.tableName,
       GROUPS_TABLE: this.groupsTable.tableName,
@@ -177,7 +181,7 @@ export class Kit2FitStack extends cdk.Stack {
     this.dailyLogsTable.grantReadData(getMyProgressFn);
 
     // --- Groups domain ---
-    const createGroupFn = mkFn('CreateGroupFn', 'src/handlers/groups/createGroup.ts');
+    const createGroupFn = mkFn('CreateGroupFn', 'src/handlers/groups/createGroup.ts', { KIT_USER_ID: kitUserId });
     this.groupsTable.grantWriteData(createGroupFn);
     this.groupMembershipsTable.grantWriteData(createGroupFn);
 
@@ -217,7 +221,7 @@ export class Kit2FitStack extends cdk.Stack {
     const createInviteLinkFn = mkFn(
       'CreateInviteLinkFn',
       'src/handlers/groups/createInviteLink.ts',
-      { INVITE_LINK_SECRET_ARN: inviteLinkSecret.secretArn },
+      { INVITE_LINK_SECRET_ARN: inviteLinkSecret.secretArn, APP_BASE_URL: 'https://ea55cc1a.kit2fit.pages.dev' },
     );
     this.groupMembershipsTable.grantReadData(createInviteLinkFn);
     inviteLinkSecret.grantRead(createInviteLinkFn);
@@ -230,7 +234,7 @@ export class Kit2FitStack extends cdk.Stack {
     inviteLinkSecret.grantRead(joinViaInviteFn);
 
     // --- Logs domain ---
-    const llmEnv = { ANTHROPIC_SECRET_NAME: anthropicApiKeySecret.secretName };
+    const llmEnv = { ANTHROPIC_SECRET_NAME: anthropicApiKeySecret.secretName, KIT_USER_ID: kitUserId };
 
     const createLogFn = mkFn('CreateLogFn', 'src/handlers/logs/createLog.ts', llmEnv);
     this.dailyLogsTable.grantReadWriteData(createLogFn);

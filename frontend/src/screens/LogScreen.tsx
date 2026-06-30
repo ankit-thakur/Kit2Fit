@@ -105,6 +105,7 @@ export function LogScreen() {
             llmBonusPoint: log.llmBonusPoint,
             llmBonusReason: log.llmBonusReason,
             adhocBonusPoint: log.adhocBonusPoint,
+            kitBonusPoint: log.kitBonusPoint,
             totalPointsForDay: log.totalPointsForDay,
           }]];
         }),
@@ -172,6 +173,7 @@ export function LogScreen() {
                 llmBonusPoint: result.llmBonusPoint,
                 llmBonusReason: result.llmBonusReason,
                 adhocBonusPoint: result.adhocBonusPoint,
+                kitBonusPoint: result.kitBonusPoint,
                 totalPointsForDay: result.totalPointsForDay,
               } as DailyLog,
             },

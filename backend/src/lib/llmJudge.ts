@@ -5,8 +5,6 @@ export interface GoalContributionInput {
   workoutDescription: string;
   goalDescription: string;
   metricUnit: string;
-  previousMetricValue: number;
-  newMetricValue: number;
 }
 
 export interface GoalContributionResult {
@@ -16,6 +14,7 @@ export interface GoalContributionResult {
 
 export interface ChallengeCandidate {
   challengeId: string;
+  title: string;
   description: string;
 }
 
@@ -48,12 +47,19 @@ async function getClient(): Promise<Anthropic> {
 }
 
 function buildPrompt(input: GoalContributionInput): string {
-  return `A user in a friendly fitness challenge has this goal: "${input.goalDescription}" (tracked in ${input.metricUnit}).
-Today's workout description: "${input.workoutDescription}"
+  return `A user has this fitness goal: "${input.goalDescription}" (tracked in ${input.metricUnit}).
+Today's workout: "${input.workoutDescription}"
 
-Decide whether today's workout activity itself DIRECTLY contributes to this specific goal (not just general fitness/health). Judge based on the activity type only — do not factor in any metric numbers, since metric progress toward the goal is scored separately. For example, if the goal is a faster mile time, a run-specific workout like interval sprints directly contributes, but an unrelated workout like a weighted leg day does not, even though it may help indirectly.
+The user did not log their ${input.metricUnit} today, so judge based solely on whether this workout DIRECTLY practices or trains what the goal requires. Indirect or supporting benefits do not count — only award true if the workout itself is the activity the goal is about.
 
-Respond with ONLY a JSON object, no other text, in this exact shape:
+Examples:
+- Goal: run a faster mile → tempo run or intervals: YES; leg press or squats: NO
+- Goal: lose weight → sustained cardio session (20+ min): YES; a few burpees or a primarily strength workout: NO
+- Goal: increase bench press max → bench press sets: YES; push-ups or overhead press: NO
+
+When in doubt, answer false. Do not give credit for effort that only indirectly helps.
+
+Respond with ONLY a JSON object, no other text:
 {"contributes": true or false, "reason": "one short sentence explaining why"}`;
 }
 
@@ -78,17 +84,17 @@ export async function judgeGoalContribution(
 
 function buildChallengePrompt(input: ChallengeMatchInput): string {
   const challengeList = input.challenges
-    .map((c, i) => `${i + 1}. (id: "${c.challengeId}") ${c.description}`)
+    .map((c, i) => `${i + 1}. (id: "${c.challengeId}") "${c.title}" — ${c.description}`)
     .join('\n');
-  return `A user in a friendly fitness challenge logged today's workout: "${input.workoutDescription}"
+  return `A user logged today's workout: "${input.workoutDescription}"
 
-Here are the group's currently active surprise challenges:
+Group challenges active today:
 ${challengeList}
 
-Decide whether the workout satisfies ANY one of these challenges. Judge based on whether the activity described genuinely matches what the challenge asks for, not just shared words.
+A challenge is COMPLETED if the user's workout contains or includes the specific activity the challenge requires, even if the workout also includes other activities. Focus on whether the challenge requirement was actually performed.
 
-Respond with ONLY a JSON object, no other text, in this exact shape:
-{"matched": true or false, "challengeId": "the id of the matching challenge, or null if none", "reason": "one short sentence explaining why"}`;
+Respond with ONLY a JSON object, no other text:
+{"matched": true or false, "challengeId": "the id of the completed challenge, or null if none matched", "reason": "one short sentence explaining why"}`;
 }
 
 export async function judgeChallengeMatch(input: ChallengeMatchInput): Promise<ChallengeMatchResult> {

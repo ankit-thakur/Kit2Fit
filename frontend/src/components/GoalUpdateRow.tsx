@@ -55,6 +55,10 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
             <span>Challenge bonus</span>
             <span className="font-semibold">+{result.adhocBonusPoint}</span>
           </div>
+          <div className="flex items-center justify-between text-gray-600">
+            <span>Kit bonus</span>
+            <span className="font-semibold">+{result.kitBonusPoint ?? 0}</span>
+          </div>
           <div className="flex items-center justify-between border-t border-gray-200 pt-1 font-bold text-green-600">
             <span>Total</span>
             <span>{result.totalPointsForDay}</span>

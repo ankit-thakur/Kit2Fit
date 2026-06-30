@@ -51,9 +51,10 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
           </p>
           <p>
             +1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your
-            target (judged by AI + your numbers).
+            target.
           </p>
-          <p>+1 bonus point if today's workout matches an active group challenge (judged by AI).</p>
+          <p>+1 bonus point if today's workout matches an active group challenge.</p>
+          <p>+1 bonus point if your workout score (before this bonus) beats Kit's total for the day.</p>
         </div>
 
         <div className="space-y-2">

@@ -70,8 +70,6 @@ describe('judgeGoalContribution', () => {
     workoutDescription: 'Ran 5 interval sprints',
     goalDescription: 'Run a faster mile',
     metricUnit: 'minutes',
-    previousMetricValue: 8,
-    newMetricValue: 7.5,
   };
 
   it('returns the parsed result on a successful API call', async () => {
@@ -106,8 +104,8 @@ describe('judgeGoalContribution', () => {
 
 describe('parseChallengeMatchResponse', () => {
   const challenges = [
-    { challengeId: 'challenge-1', description: 'Do 20 pushups' },
-    { challengeId: 'challenge-2', description: 'Run a 5k' },
+    { challengeId: 'challenge-1', title: 'Pushup Challenge', description: 'Do 20 pushups' },
+    { challengeId: 'challenge-2', title: '5K Run', description: 'Run a 5k' },
   ];
 
   it('parses a well-formed JSON response with a valid challengeId', () => {
@@ -150,7 +148,7 @@ describe('judgeChallengeMatch', () => {
     mockCreate.mockReset();
   });
 
-  const challenges = [{ challengeId: 'challenge-1', description: 'Do 20 pushups' }];
+  const challenges = [{ challengeId: 'challenge-1', title: 'Pushup Challenge', description: 'Do 20 pushups' }];
 
   it('returns matched: false without calling the API when there are no candidate challenges', async () => {
     const result = await judgeChallengeMatch({ workoutDescription: 'Ran 3 miles', challenges: [] });

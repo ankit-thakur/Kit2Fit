@@ -10,6 +10,7 @@ export function calculateTotalPoints(
   durationPoints: number,
   llmBonusPoint: 0 | 1,
   adhocBonusPoint: 0 | 1,
+  kitBonusPoint: 0 | 1 = 0,
 ): number {
-  return durationPoints + llmBonusPoint + adhocBonusPoint;
+  return durationPoints + llmBonusPoint + adhocBonusPoint + kitBonusPoint;
 }

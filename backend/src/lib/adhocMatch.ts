@@ -27,7 +27,7 @@ export async function matchAdhocChallenge(
 
   const result = await judgeChallengeMatch({
     workoutDescription: description,
-    challenges: challenges.map((c) => ({ challengeId: c.challengeId, description: c.description })),
+    challenges: challenges.map((c) => ({ challengeId: c.challengeId, title: c.title, description: c.description })),
   });
 
   return result.matched ? { matched: true, challengeId: result.challengeId } : { matched: false };
