@@ -50,15 +50,17 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           }),
         );
 
-        const series = logs.filter((log) => log.metricValueAfter != null).map((log) => ({
-          date: log.date,
-          percent: calculateGoalProgressPercent(
-            membership.startingMetricValue ?? 0,
-            membership.targetMetricValue ?? 0,
-            log.metricValueAfter,
-          ),
-          metricValue: log.metricValueAfter,
-        }));
+        const series = logs
+          .filter((log) => log.metricValueAfter != null && log.metricValueAfter !== 0)
+          .flatMap((log) => {
+            const percent = calculateGoalProgressPercent(
+              membership.startingMetricValue ?? 0,
+              membership.targetMetricValue ?? 0,
+              log.metricValueAfter,
+            );
+            if (percent === null) return [];
+            return [{ date: log.date, percent, metricValue: log.metricValueAfter }];
+          });
 
         return {
           groupId: membership.groupId,

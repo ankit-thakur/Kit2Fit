@@ -89,8 +89,8 @@ export function LogScreen() {
       Object.fromEntries(
         groups.map((g) => {
           const log = logsByGroup[g.groupId]?.[selectedDate];
-          const value = log?.metricValueAfter ?? g.membership.currentMetricValue;
-          return [g.groupId, value === undefined || value === null ? '' : String(value)];
+          const value = log?.metricValueAfter ?? (g.membership.currentMetricValue || undefined);
+          return [g.groupId, value != null ? String(value) : ''];
         }),
       ),
     );
@@ -202,7 +202,7 @@ export function LogScreen() {
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">Log workout</h1>
-        <p className="text-sm text-gray-500">Confess your cardio.</p>
+        <p className="text-sm text-gray-500">It's time to come clean.</p>
       </div>
 
       <ChallengeBanner groups={groups} />
