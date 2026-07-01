@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, type Location } from 'react-router-dom';
 import { signUp, confirmSignUp } from '../auth/cognito';
+import { useAuth } from '../auth/AuthContext';
 
 export function SignupScreen() {
+  const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState<'details' | 'confirm'>('details');
   const [form, setForm] = useState({
     email: '',
@@ -40,7 +43,12 @@ export function SignupScreen() {
     setIsSubmitting(true);
     try {
       await confirmSignUp(form.email, code);
-      navigate('/login', { replace: true });
+      await signIn(form.email, form.password);
+      const fromLocation = (location.state as { from?: Location })?.from;
+      navigate(
+        fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/',
+        { replace: true },
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to confirm account');
     } finally {
