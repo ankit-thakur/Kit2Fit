@@ -3,7 +3,8 @@ import { QueryCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
 import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { json, handleErrors } from '../../lib/http';
-import { calculateGoalProgressPercent } from '../../lib/progress';
+import { calculateGoalProgressPercent, calculateDailyHabitSeries } from '../../lib/progress';
+import { GOAL_CATEGORIES, isGoalCategory } from '../../lib/goalCategories';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -50,15 +51,24 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           }),
         );
 
-        const series = logs.map((log) => ({
-          date: log.date,
-          percent: calculateGoalProgressPercent(
-            membership.startingMetricValue ?? 0,
-            membership.targetMetricValue ?? 0,
-            log.metricValueAfter,
-          ),
-          metricValue: log.metricValueAfter,
-        }));
+        const isDailyHabit =
+          isGoalCategory(membership.goalCategory) &&
+          GOAL_CATEGORIES[membership.goalCategory].goalType === 'daily_habit';
+
+        const series = isDailyHabit
+          ? calculateDailyHabitSeries(
+              logs as { date: string; metricValueAfter: number }[],
+              membership.targetMetricValue ?? 0,
+            )
+          : logs.map((log) => ({
+              date: log.date,
+              percent: calculateGoalProgressPercent(
+                membership.startingMetricValue ?? 0,
+                membership.targetMetricValue ?? 0,
+                log.metricValueAfter,
+              ),
+              metricValue: log.metricValueAfter,
+            }));
 
         return {
           groupId: membership.groupId,

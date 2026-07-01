@@ -27,7 +27,11 @@ export function GoalUpdateRow({ group, metricValue, onMetricValueChange, result,
           step="any"
           value={metricValue}
           onChange={(e) => onMetricValueChange(e.target.value)}
-          placeholder={`Current ${membership.metricUnit || 'value'}`}
+          placeholder={
+            membership.goalCategory === 'daily_habit'
+              ? `Today's count (target: ${membership.targetMetricValue ?? 0})`
+              : `Current ${membership.metricUnit || 'value'}`
+          }
           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-coral focus:outline-none"
         />
         {membership.metricUnit && <span className="text-sm text-gray-500">{membership.metricUnit}</span>}

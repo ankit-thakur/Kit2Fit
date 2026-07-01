@@ -8,6 +8,7 @@ import { calculateDurationPoints, calculateTotalPoints } from '../../lib/points'
 import { judgeGoalContribution } from '../../lib/llmJudge';
 import { matchAdhocChallenge } from '../../lib/adhocMatch';
 import { hasLaterLog } from '../../lib/logs';
+import { GOAL_CATEGORIES, isGoalCategory } from '../../lib/goalCategories';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -43,6 +44,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const durationPoints = calculateDurationPoints(minutesWorkedOut);
     const previousMetricValue = membership.currentMetricValue ?? 0;
+    const isDailyHabit =
+      isGoalCategory(membership.goalCategory) &&
+      GOAL_CATEGORIES[membership.goalCategory].goalType === 'daily_habit';
 
     const [judgeResult, adhocResult, isBackfill] = await Promise.all([
       judgeGoalContribution({
@@ -56,16 +60,19 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       hasLaterLog(groupIdUserId, date),
     ]);
 
-    const metricMovedFavorably =
-      typeof membership.targetMetricValue === 'number' &&
-      Math.abs(membership.targetMetricValue - metricValueAfter) <
-        Math.abs(membership.targetMetricValue - previousMetricValue);
+    const metricMovedFavorably = isDailyHabit
+      ? metricValueAfter >= (membership.targetMetricValue ?? 0)
+      : typeof membership.targetMetricValue === 'number' &&
+        Math.abs(membership.targetMetricValue - metricValueAfter) <
+          Math.abs(membership.targetMetricValue - previousMetricValue);
 
     const llmBonusPoint = judgeResult.contributes || metricMovedFavorably ? 1 : 0;
     const llmBonusReason = judgeResult.contributes
       ? judgeResult.reason
       : metricMovedFavorably
-        ? `Your ${membership.metricUnit ?? 'metric'} moved from ${previousMetricValue} to ${metricValueAfter}, trending toward your goal.`
+        ? isDailyHabit
+          ? `You hit your daily target of ${membership.targetMetricValue} ${membership.metricUnit ?? 'count'} with ${metricValueAfter}.`
+          : `Your ${membership.metricUnit ?? 'metric'} moved from ${previousMetricValue} to ${metricValueAfter}, trending toward your goal.`
         : judgeResult.reason;
     const adhocBonusPoint = adhocResult.matched ? 1 : 0;
     const totalPointsForDay = calculateTotalPoints(durationPoints, llmBonusPoint, adhocBonusPoint);

@@ -4,7 +4,8 @@ import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { requireMembership } from '../../lib/groups';
 import { json, handleErrors, HttpError } from '../../lib/http';
-import { calculateGoalProgressPercent } from '../../lib/progress';
+import { calculateGoalProgressPercent, calculateDailyHabitSeries } from '../../lib/progress';
+import { GOAL_CATEGORIES, isGoalCategory } from '../../lib/goalCategories';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -49,22 +50,42 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
     const membersById = new Map(members.map((m) => [m.userId, m]));
 
+    const logsByUser = new Map<string, { date: string; metricValueAfter: number }[]>();
+    for (const log of logs) {
+      const userLogs = logsByUser.get(log.userId) ?? [];
+      userLogs.push({ date: log.date, metricValueAfter: log.metricValueAfter });
+      logsByUser.set(log.userId, userLogs);
+    }
+
     const seriesByUser = new Map<
       string,
       { date: string; percent: number | null; metricValue: number }[]
     >();
-    for (const log of logs) {
-      const member = membersById.get(log.userId);
-      const percent = member
-        ? calculateGoalProgressPercent(
-            member.startingMetricValue ?? 0,
-            member.targetMetricValue ?? 0,
-            log.metricValueAfter,
-          )
-        : null;
-      const series = seriesByUser.get(log.userId) ?? [];
-      series.push({ date: log.date, percent, metricValue: log.metricValueAfter });
-      seriesByUser.set(log.userId, series);
+    for (const [uid, userLogs] of logsByUser) {
+      const member = membersById.get(uid);
+      const isDailyHabit =
+        member &&
+        isGoalCategory(member.goalCategory) &&
+        GOAL_CATEGORIES[member.goalCategory].goalType === 'daily_habit';
+
+      if (isDailyHabit && member) {
+        seriesByUser.set(uid, calculateDailyHabitSeries(userLogs, member.targetMetricValue ?? 0));
+      } else {
+        seriesByUser.set(
+          uid,
+          userLogs.map((log) => ({
+            date: log.date,
+            percent: member
+              ? calculateGoalProgressPercent(
+                  member.startingMetricValue ?? 0,
+                  member.targetMetricValue ?? 0,
+                  log.metricValueAfter,
+                )
+              : null,
+            metricValue: log.metricValueAfter,
+          })),
+        );
+      }
     }
 
     const progress = [...seriesByUser.entries()].map(([uid, series]) => ({

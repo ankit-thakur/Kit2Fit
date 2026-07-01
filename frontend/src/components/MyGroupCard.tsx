@@ -46,7 +46,7 @@ export function MyGroupCard({
     try {
       await updateMemberGoal(group.groupId, currentUserId, {
         goalDescription: goalForm.goalDescription,
-        currentMetricValue: Number(goalForm.currentMetricValue),
+        currentMetricValue: goalForm.goalCategory === 'daily_habit' ? 0 : Number(goalForm.currentMetricValue),
         targetMetricValue: Number(goalForm.targetMetricValue),
         goalCategory: goalForm.goalCategory as GoalCategory,
       });
@@ -101,9 +101,18 @@ export function MyGroupCard({
 
       {isLocked ? (
         <p className="text-sm text-gray-500">
-          Goal: {membership.goalDescription || 'no goal set (bold strategy)'} ({membership.startingMetricValue} →{' '}
-          {membership.currentMetricValue} / {membership.targetMetricValue} {membership.metricUnit})
-          {progressPercent !== null && <span className="font-semibold"> · {Math.round(progressPercent)}%</span>}
+          {membership.goalCategory === 'daily_habit' ? (
+            <>
+              Goal: {membership.goalDescription || 'no goal set (bold strategy)'} (daily target:{' '}
+              {membership.targetMetricValue} {membership.metricUnit})
+            </>
+          ) : (
+            <>
+              Goal: {membership.goalDescription || 'no goal set (bold strategy)'} ({membership.startingMetricValue} →{' '}
+              {membership.currentMetricValue} / {membership.targetMetricValue} {membership.metricUnit})
+              {progressPercent !== null && <span className="font-semibold"> · {Math.round(progressPercent)}%</span>}
+            </>
+          )}
         </p>
       ) : (
         <div className="space-y-2">
@@ -114,18 +123,20 @@ export function MyGroupCard({
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
           <div className="flex gap-2">
+            {goalForm.goalCategory !== 'daily_habit' && (
+              <input
+                type="number"
+                step="any"
+                placeholder="Starting value"
+                value={goalForm.currentMetricValue}
+                onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            )}
             <input
               type="number"
               step="any"
-              placeholder="Starting value"
-              value={goalForm.currentMetricValue}
-              onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-            <input
-              type="number"
-              step="any"
-              placeholder="Target value"
+              placeholder={goalForm.goalCategory === 'daily_habit' ? 'Daily target (e.g. 10000)' : 'Target value'}
               value={goalForm.targetMetricValue}
               onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"

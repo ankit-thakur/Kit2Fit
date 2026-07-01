@@ -53,7 +53,7 @@ export function OnboardingFlow({
     try {
       await updateMemberGoal(group.groupId, userId, {
         goalDescription: goalForm.goalDescription,
-        currentMetricValue: Number(goalForm.currentMetricValue),
+        currentMetricValue: goalForm.goalCategory === 'daily_habit' ? 0 : Number(goalForm.currentMetricValue),
         targetMetricValue: Number(goalForm.targetMetricValue),
         goalCategory: goalForm.goalCategory as GoalCategory,
       });
@@ -127,28 +127,31 @@ export function OnboardingFlow({
                   {GOAL_CATEGORY_OPTIONS.map((opt) => (
                     <li key={opt.value}>
                       <span className="font-semibold text-gray-600">{opt.label}</span> · tracked in {opt.metricUnit}
+                      {opt.goalType === 'daily_habit' && ' · hit rate %'}
                     </li>
                   ))}
                 </ul>
                 <input
-                  placeholder="Goal description"
+                  placeholder="Goal description (e.g. Walk 10,000 steps per day)"
                   value={goalForm.goalDescription}
                   onChange={(e) => setGoalForm((p) => ({ ...p, goalDescription: e.target.value }))}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 />
                 <div className="flex gap-2">
+                  {goalForm.goalCategory !== 'daily_habit' && (
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="Starting value"
+                      value={goalForm.currentMetricValue}
+                      onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  )}
                   <input
                     type="number"
                     step="any"
-                    placeholder="Starting value"
-                    value={goalForm.currentMetricValue}
-                    onChange={(e) => setGoalForm((p) => ({ ...p, currentMetricValue: e.target.value }))}
-                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  />
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="Target value"
+                    placeholder={goalForm.goalCategory === 'daily_habit' ? 'Daily target (e.g. 10000)' : 'Target value'}
                     value={goalForm.targetMetricValue}
                     onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
