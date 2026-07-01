@@ -14,7 +14,10 @@ export function GroupDashboardWidget({ group }: { group: MyGroup }) {
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([getLeaderboard(group.groupId), getProgress(group.groupId)])
+    Promise.all([
+      getLeaderboard(group.groupId),
+      getProgress(group.groupId, { from: group.challengeStartDate, to: group.challengeEndDate }),
+    ])
       .then(([leaderboardRes, progressRes]) => {
         setLeaderboard(leaderboardRes.leaderboard);
         setProgress(progressRes.progress);

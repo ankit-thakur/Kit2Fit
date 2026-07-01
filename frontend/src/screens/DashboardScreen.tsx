@@ -20,7 +20,10 @@ function SingleGroupDashboard({ groups }: { groups: MyGroup[] }) {
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([getLeaderboard(selectedGroupId), getProgress(selectedGroupId)])
+    Promise.all([
+      getLeaderboard(selectedGroupId),
+      getProgress(selectedGroupId, { from: selectedGroup.challengeStartDate, to: selectedGroup.challengeEndDate }),
+    ])
       .then(([leaderboardRes, progressRes]) => {
         setLeaderboard(leaderboardRes.leaderboard);
         setProgress(progressRes.progress);
