@@ -3,7 +3,6 @@ import type { MyGroup } from '../api/groups';
 import { updateMemberGoal, removeMember } from '../api/groups';
 import { GroupAdminPanel } from './GroupAdminPanel';
 import { RulesAndScoringModal } from './RulesAndScoringModal';
-import { calculateGoalProgressPercent } from '@shared/progress';
 import { GOAL_CATEGORY_OPTIONS, type GoalCategory } from '@shared/goalCategories';
 
 export function MyGroupCard({
@@ -17,7 +16,6 @@ export function MyGroupCard({
 }) {
   const { membership } = group;
   const isAdmin = membership.role === 'admin';
-  const isLocked = new Date() >= new Date(group.challengeStartDate);
 
   const [isManaging, setIsManaging] = useState(false);
   const [showRules, setShowRules] = useState(false);
@@ -30,12 +28,6 @@ export function MyGroupCard({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const progressPercent = calculateGoalProgressPercent(
-    membership.startingMetricValue,
-    membership.targetMetricValue,
-    membership.currentMetricValue,
-  );
-
   async function handleSaveGoal() {
     if (!goalForm.goalCategory) {
       setError('Please select a goal category');
@@ -46,7 +38,7 @@ export function MyGroupCard({
     try {
       await updateMemberGoal(group.groupId, currentUserId, {
         goalDescription: goalForm.goalDescription,
-        currentMetricValue: Number(goalForm.currentMetricValue),
+        currentMetricValue: goalForm.goalCategory === 'daily_habit' ? 0 : Number(goalForm.currentMetricValue),
         targetMetricValue: Number(goalForm.targetMetricValue),
         goalCategory: goalForm.goalCategory as GoalCategory,
       });
@@ -99,21 +91,15 @@ export function MyGroupCard({
 
       {showRules && <RulesAndScoringModal group={group} onClose={() => setShowRules(false)} />}
 
-      {isLocked ? (
-        <p className="text-sm text-gray-500">
-          Goal: {membership.goalDescription || 'no goal set (bold strategy)'} ({membership.startingMetricValue} →{' '}
-          {membership.currentMetricValue} / {membership.targetMetricValue} {membership.metricUnit})
-          {progressPercent !== null && <span className="font-semibold"> · {Math.round(progressPercent)}%</span>}
-        </p>
-      ) : (
-        <div className="space-y-2">
-          <input
-            placeholder="Goal description"
-            value={goalForm.goalDescription}
-            onChange={(e) => setGoalForm((p) => ({ ...p, goalDescription: e.target.value }))}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-          <div className="flex gap-2">
+      <div className="space-y-2">
+        <input
+          placeholder="Goal description"
+          value={goalForm.goalDescription}
+          onChange={(e) => setGoalForm((p) => ({ ...p, goalDescription: e.target.value }))}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+        />
+        <div className="flex gap-2">
+          {goalForm.goalCategory !== 'daily_habit' && (
             <div className="flex-1">
               <label className="mb-1 block text-xs font-medium text-gray-600">Starting value</label>
               <input
@@ -125,41 +111,43 @@ export function MyGroupCard({
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
             </div>
-            <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-gray-600">Target value</label>
-              <input
-                type="number"
-                step="any"
-                placeholder="e.g. 160"
-                value={goalForm.targetMetricValue}
-                onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
+          )}
+          <div className="flex-1">
+            <label className="mb-1 block text-xs font-medium text-gray-600">
+              {goalForm.goalCategory === 'daily_habit' ? 'Daily target' : 'Target value'}
+            </label>
+            <input
+              type="number"
+              step="any"
+              placeholder={goalForm.goalCategory === 'daily_habit' ? 'e.g. 10000' : 'e.g. 160'}
+              value={goalForm.targetMetricValue}
+              onChange={(e) => setGoalForm((p) => ({ ...p, targetMetricValue: e.target.value }))}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
           </div>
-          <select
-            value={goalForm.goalCategory}
-            onChange={(e) => setGoalForm((p) => ({ ...p, goalCategory: e.target.value }))}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="" disabled>
-              Select a goal category
-            </option>
-            {GOAL_CATEGORY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label} ({opt.metricUnit})
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleSaveGoal}
-            disabled={isSaving}
-            className="w-full rounded-lg bg-teal-pale py-2 text-sm font-semibold text-teal-dark disabled:opacity-50"
-          >
-            {isSaving ? 'Saving...' : 'Save goal'}
-          </button>
         </div>
-      )}
+        <select
+          value={goalForm.goalCategory}
+          onChange={(e) => setGoalForm((p) => ({ ...p, goalCategory: e.target.value }))}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+        >
+          <option value="" disabled>
+            Select a goal category
+          </option>
+          {GOAL_CATEGORY_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label} ({opt.metricUnit})
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleSaveGoal}
+          disabled={isSaving}
+          className="w-full rounded-lg bg-teal-pale py-2 text-sm font-semibold text-teal-dark disabled:opacity-50"
+        >
+          {isSaving ? 'Saving...' : 'Save goal'}
+        </button>
+      </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 

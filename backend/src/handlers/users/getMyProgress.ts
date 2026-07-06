@@ -3,7 +3,12 @@ import { QueryCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
 import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { json, handleErrors } from '../../lib/http';
-import { calculateGoalProgressPercent } from '../../lib/progress';
+import {
+  calculateGoalProgressPercent,
+  calculateDailyHabitSeries,
+  calculateChallengeDayCount,
+} from '../../lib/progress';
+import { GOAL_CATEGORIES, isGoalCategory } from '../../lib/goalCategories';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -31,9 +36,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         },
       }),
     );
-    const groupNamesById = new Map(
-      (Responses?.[Tables.groups] ?? []).map((g) => [g.groupId, g.name]),
-    );
+    const groupsById = new Map((Responses?.[Tables.groups] ?? []).map((g) => [g.groupId, g]));
 
     const goals = await Promise.all(
       memberships.map(async (membership) => {
@@ -50,21 +53,35 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           }),
         );
 
-        const series = logs
-          .filter((log) => log.metricValueAfter != null && log.metricValueAfter !== 0)
-          .flatMap((log) => {
-            const percent = calculateGoalProgressPercent(
-              membership.startingMetricValue ?? 0,
+        const isDailyHabit =
+          isGoalCategory(membership.goalCategory) &&
+          GOAL_CATEGORIES[membership.goalCategory].goalType === 'daily_habit';
+        const group = groupsById.get(membership.groupId);
+        const totalChallengeDays = group
+          ? calculateChallengeDayCount(group.challengeStartDate, group.challengeEndDate)
+          : 1;
+
+        const series = isDailyHabit
+          ? calculateDailyHabitSeries(
+              logs as { date: string; metricValueAfter: number }[],
               membership.targetMetricValue ?? 0,
-              log.metricValueAfter,
-            );
-            if (percent === null) return [];
-            return [{ date: log.date, percent, metricValue: log.metricValueAfter }];
-          });
+              totalChallengeDays,
+            )
+          : logs
+              .filter((log) => log.metricValueAfter != null && log.metricValueAfter !== 0)
+              .flatMap((log) => {
+                const percent = calculateGoalProgressPercent(
+                  membership.startingMetricValue ?? 0,
+                  membership.targetMetricValue ?? 0,
+                  log.metricValueAfter,
+                );
+                if (percent === null) return [];
+                return [{ date: log.date, percent, metricValue: log.metricValueAfter }];
+              });
 
         return {
           groupId: membership.groupId,
-          groupName: groupNamesById.get(membership.groupId) ?? 'Unknown group',
+          groupName: group?.name ?? 'Unknown group',
           goalDescription: membership.goalDescription || 'Goal',
           metricUnit: membership.metricUnit ?? '',
           series,

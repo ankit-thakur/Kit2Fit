@@ -96,4 +96,61 @@ describe('getMyProgress handler', () => {
     expect(result.statusCode).toBe(200);
     expect(JSON.parse(result.body)).toEqual({ goals: [] });
   });
+
+  it('scores a daily_habit goal against the whole challenge window, not just logged days', async () => {
+    ddbMock
+      .on(QueryCommand, {
+        TableName: 'GroupMemberships',
+        IndexName: 'GSI1-UserGroups',
+        KeyConditionExpression: 'userId = :userId',
+      })
+      .resolves({
+        Items: [
+          {
+            groupId: 'group-1',
+            userId: 'user-1',
+            goalDescription: 'Walk 10,000 steps',
+            goalCategory: 'daily_habit',
+            targetMetricValue: 10000,
+            metricUnit: 'count',
+          },
+        ],
+      });
+    ddbMock.on(BatchGetCommand).resolves({
+      Responses: {
+        Groups: [
+          {
+            groupId: 'group-1',
+            name: 'Step Crew',
+            challengeStartDate: '2026-06-01',
+            challengeEndDate: '2026-06-30',
+          },
+        ],
+      },
+    });
+    ddbMock.on(QueryCommand, { TableName: 'DailyLogs' }).resolves({
+      Items: [
+        { date: '2026-06-01', metricValueAfter: 9000 },
+        { date: '2026-06-02', metricValueAfter: 11000 },
+      ],
+    });
+
+    const result = await handler(buildEvent());
+    expect(result.statusCode).toBe(200);
+    const body = JSON.parse(result.body);
+    expect(body.goals).toEqual([
+      {
+        groupId: 'group-1',
+        groupName: 'Step Crew',
+        goalDescription: 'Walk 10,000 steps',
+        metricUnit: 'count',
+        series: [
+          { date: '2026-06-01', percent: 0, metricValue: 9000 },
+          { date: '2026-06-02', percent: 100 / 30, metricValue: 11000 },
+        ],
+      },
+    ]);
+    // Guards against regressing to the old logged-days-only 50% reading.
+    expect(body.goals[0].series[1].percent).toBeLessThan(10);
+  });
 });
