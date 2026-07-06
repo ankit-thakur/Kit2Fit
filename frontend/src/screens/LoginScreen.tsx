@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, type Location } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 export function LoginScreen() {
@@ -17,8 +17,11 @@ export function LoginScreen() {
     setIsSubmitting(true);
     try {
       await signIn(email, password);
-      const from = (location.state as { from?: Location })?.from?.pathname ?? '/';
-      navigate(from, { replace: true });
+      const fromLocation = (location.state as { from?: Location })?.from;
+      navigate(
+        fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/',
+        { replace: true },
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');
     } finally {
@@ -62,7 +65,7 @@ export function LoginScreen() {
       </form>
       <p className="mt-4 text-sm text-gray-500">
         New here? Your friends are already winning.{' '}
-        <Link to="/signup" className="font-semibold text-ink">
+        <Link to="/signup" state={location.state} className="font-semibold text-ink">
           Create an account
         </Link>
       </p>

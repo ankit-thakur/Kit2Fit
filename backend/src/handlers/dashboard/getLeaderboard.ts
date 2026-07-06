@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { QueryCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
+import { QueryCommand, BatchGetCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { requireMembership } from '../../lib/groups';
@@ -14,6 +14,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     await requireMembership(groupId, userId);
 
+    const { Item: group } = await ddb.send(
+      new GetCommand({ TableName: Tables.groups, Key: { groupId } }),
+    );
+    if (!group) {
+      throw new HttpError(404, 'Group not found');
+    }
+
     const { Items: memberships = [] } = await ddb.send(
       new QueryCommand({
         TableName: Tables.groupMemberships,
@@ -21,6 +28,26 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         ExpressionAttributeValues: { ':groupId': groupId },
       }),
     );
+
+    // Points are scoped to the challenge window so a member's total can't be inflated by
+    // logs backfilled before the challenge started or dated after it ended.
+    const { Items: logs = [] } = await ddb.send(
+      new QueryCommand({
+        TableName: Tables.dailyLogs,
+        IndexName: 'GSI1-GroupDate',
+        KeyConditionExpression: 'groupId = :groupId AND dateUserId BETWEEN :from AND :to',
+        ExpressionAttributeValues: {
+          ':groupId': groupId,
+          ':from': group.challengeStartDate,
+          ':to': `${group.challengeEndDate}#zzzz`,
+        },
+      }),
+    );
+
+    const pointsByUser = new Map<string, number>();
+    for (const log of logs) {
+      pointsByUser.set(log.userId, (pointsByUser.get(log.userId) ?? 0) + (log.totalPointsForDay ?? 0));
+    }
 
     const { Responses } = memberships.length
       ? await ddb.send(
@@ -40,7 +67,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       .map((m) => ({
         userId: m.userId,
         nickname: nicknamesById.get(m.userId) ?? 'Unknown',
-        totalPoints: m.totalPoints ?? 0,
+        totalPoints: pointsByUser.get(m.userId) ?? 0,
       }))
       .sort((a, b) => b.totalPoints - a.totalPoints);
 

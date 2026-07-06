@@ -274,11 +274,14 @@ export class Kit2FitStack extends cdk.Stack {
     const getLeaderboardFn = mkFn('GetLeaderboardFn', 'src/handlers/dashboard/getLeaderboard.ts');
     this.groupMembershipsTable.grantReadData(getLeaderboardFn);
     this.usersTable.grantReadData(getLeaderboardFn);
+    this.groupsTable.grantReadData(getLeaderboardFn);
+    this.dailyLogsTable.grantReadData(getLeaderboardFn);
 
     const getProgressFn = mkFn('GetProgressFn', 'src/handlers/dashboard/getProgress.ts');
     this.dailyLogsTable.grantReadData(getProgressFn);
     this.groupMembershipsTable.grantReadData(getProgressFn);
     this.usersTable.grantReadData(getProgressFn);
+    this.groupsTable.grantReadData(getProgressFn);
 
     // --- API Gateway ---
     const api = new apigateway.RestApi(this, 'Kit2FitApi', {
