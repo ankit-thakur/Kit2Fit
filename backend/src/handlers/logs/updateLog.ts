@@ -40,32 +40,47 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       isGoalCategory(membership.goalCategory) &&
       GOAL_CATEGORIES[membership.goalCategory].goalType === 'daily_habit';
 
+    // If the metric didn't change, the goal bonus earned earlier in the day is
+    // preserved as-is. Re-evaluating it would always return 0 because the
+    // membership's currentMetricValue was already updated by the first log.
+    const metricUnchanged = metricValueAfter === existingLog.metricValueAfter;
+
     const [judgeResult, adhocResult, isBackfill] = await Promise.all([
-      judgeGoalContribution({
-        workoutDescription: description,
-        goalDescription: membership.goalDescription ?? '',
-        metricUnit: membership.metricUnit ?? '',
-        previousMetricValue,
-        newMetricValue: metricValueAfter,
-      }),
+      metricUnchanged
+        ? Promise.resolve({ contributes: false as const, reason: '' })
+        : judgeGoalContribution({
+            workoutDescription: description,
+            goalDescription: membership.goalDescription ?? '',
+            metricUnit: membership.metricUnit ?? '',
+            previousMetricValue,
+            newMetricValue: metricValueAfter,
+          }),
       matchAdhocChallenge(groupId, date, description),
       hasLaterLog(groupIdUserId, date),
     ]);
 
-    const metricMovedFavorably = isDailyHabit
-      ? metricValueAfter >= (membership.targetMetricValue ?? 0)
-      : typeof membership.targetMetricValue === 'number' &&
-        Math.abs(membership.targetMetricValue - metricValueAfter) <
-          Math.abs(membership.targetMetricValue - previousMetricValue);
+    const metricMovedFavorably =
+      !metricUnchanged &&
+      (isDailyHabit
+        ? metricValueAfter >= (membership.targetMetricValue ?? 0)
+        : typeof membership.targetMetricValue === 'number' &&
+          Math.abs(membership.targetMetricValue - metricValueAfter) <
+            Math.abs(membership.targetMetricValue - previousMetricValue));
 
-    const llmBonusPoint = judgeResult.contributes || metricMovedFavorably ? 1 : 0;
-    const llmBonusReason = judgeResult.contributes
-      ? judgeResult.reason
-      : metricMovedFavorably
-        ? isDailyHabit
-          ? `You hit your daily target of ${membership.targetMetricValue} ${membership.metricUnit ?? 'count'} with ${metricValueAfter}.`
-          : `Your ${membership.metricUnit ?? 'metric'} moved from ${previousMetricValue} to ${metricValueAfter}, trending toward your goal.`
-        : judgeResult.reason;
+    const llmBonusPoint: 0 | 1 = metricUnchanged
+      ? (existingLog.llmBonusPoint as 0 | 1)
+      : judgeResult.contributes || metricMovedFavorably
+        ? 1
+        : 0;
+    const llmBonusReason: string = metricUnchanged
+      ? (existingLog.llmBonusReason as string)
+      : judgeResult.contributes
+        ? judgeResult.reason
+        : metricMovedFavorably
+          ? isDailyHabit
+            ? `You hit your daily target of ${membership.targetMetricValue} ${membership.metricUnit ?? 'count'} with ${metricValueAfter}.`
+            : `Your ${membership.metricUnit ?? 'metric'} moved from ${previousMetricValue} to ${metricValueAfter}, trending toward your goal.`
+          : judgeResult.reason;
     const adhocBonusPoint = adhocResult.matched ? 1 : 0;
     const totalPointsForDay = calculateTotalPoints(durationPoints, llmBonusPoint, adhocBonusPoint);
     const pointsDelta = totalPointsForDay - existingLog.totalPointsForDay;
