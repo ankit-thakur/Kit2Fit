@@ -17,6 +17,7 @@ export interface CreateGroupInput {
   goalCategory: string;
   challengeStartDate: string;
   challengeEndDate: string;
+  workoutDurationCapMinutes?: number;
 }
 
 export function createGroup(input: CreateGroupInput): Promise<Group> {
@@ -70,6 +71,7 @@ export interface CreateChallengeInput {
   description: string;
   startDate: string;
   endDate: string;
+  pointValue?: number;
 }
 
 export function createChallenge(groupId: string, input: CreateChallengeInput): Promise<AdhocChallenge> {
@@ -82,4 +84,14 @@ export function listChallenges(groupId: string, date?: string): Promise<{ challe
 
 export function deleteChallenge(groupId: string, challengeId: string): Promise<void> {
   return apiRequest('DELETE', `/groups/${groupId}/challenges/${challengeId}`);
+}
+
+export type UpdateChallengeInput = Partial<CreateChallengeInput>;
+
+export function updateChallenge(
+  groupId: string,
+  challengeId: string,
+  updates: UpdateChallengeInput,
+): Promise<AdhocChallenge> {
+  return apiRequest('PUT', `/groups/${groupId}/challenges/${challengeId}`, updates);
 }

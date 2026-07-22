@@ -24,6 +24,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw new HttpError(400, 'startDate must be on or before endDate');
     }
 
+    let pointValue = 1;
+    if (body.pointValue !== undefined) {
+      if (typeof body.pointValue !== 'number' || !Number.isInteger(body.pointValue) || body.pointValue <= 0) {
+        throw new HttpError(400, 'pointValue must be a positive integer');
+      }
+      pointValue = body.pointValue;
+    }
+
     const challengeId = randomUUID();
     const now = new Date().toISOString();
 
@@ -37,12 +45,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           description,
           startDate,
           endDate,
+          pointValue,
           createdBy: userId,
           createdAt: now,
         },
       }),
     );
 
-    return json(201, { groupId, challengeId, title, description, startDate, endDate });
+    return json(201, { groupId, challengeId, title, description, startDate, endDate, pointValue });
   });
 }

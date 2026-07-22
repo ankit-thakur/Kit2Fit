@@ -34,6 +34,7 @@ describe('createLog handler', () => {
   beforeEach(() => {
     ddbMock.reset();
     ddbMock.on(QueryCommand).resolves({ Items: [] });
+    ddbMock.on(GetCommand, { TableName: 'Groups', Key: { groupId: 'group-1' } }).resolves({ Item: undefined });
     (judgeGoalContribution as jest.Mock).mockReset();
     (matchAdhocChallenge as jest.Mock).mockReset();
   });
@@ -100,6 +101,91 @@ describe('createLog handler', () => {
       ':metricValueAfter': 7.5,
       ':points': 4,
     });
+  });
+
+  it('caps duration points using the group-configured workout duration cap', async () => {
+    ddbMock
+      .on(GetCommand, {
+        TableName: 'GroupMemberships',
+        Key: { groupId: 'group-1', userId: 'user-1' },
+      })
+      .resolves({
+        Item: {
+          groupId: 'group-1',
+          userId: 'user-1',
+          goalDescription: 'Run a faster mile',
+          metricUnit: 'minutes',
+          currentMetricValue: 8,
+          totalPoints: 10,
+        },
+      });
+    ddbMock
+      .on(GetCommand, { TableName: 'DailyLogs', Key: { groupIdUserId: 'group-1#user-1', date: '2026-06-01' } })
+      .resolves({ Item: undefined });
+    ddbMock
+      .on(GetCommand, { TableName: 'Groups', Key: { groupId: 'group-1' } })
+      .resolves({ Item: { groupId: 'group-1', workoutDurationCapMinutes: 30 } });
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(UpdateCommand).resolves({});
+
+    (judgeGoalContribution as jest.Mock).mockResolvedValue({ contributes: false, reason: 'Not related.' });
+    (matchAdhocChallenge as jest.Mock).mockResolvedValue({ matched: false });
+
+    const event = buildEvent({
+      date: '2026-06-01',
+      minutesWorkedOut: 60,
+      description: 'Long run',
+      metricValueAfter: 7.5,
+    });
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(201);
+    const body = JSON.parse(result.body);
+    // With a 30-minute cap, duration points top out at 2 (30 / 15) instead of the default 4.
+    expect(body.durationPoints).toBe(2);
+  });
+
+  it('awards the ad-hoc bonus using the matched challenge point value', async () => {
+    ddbMock
+      .on(GetCommand, {
+        TableName: 'GroupMemberships',
+        Key: { groupId: 'group-1', userId: 'user-1' },
+      })
+      .resolves({
+        Item: {
+          groupId: 'group-1',
+          userId: 'user-1',
+          goalDescription: 'Run a faster mile',
+          metricUnit: 'minutes',
+          currentMetricValue: 8,
+          totalPoints: 10,
+        },
+      });
+    ddbMock
+      .on(GetCommand, { TableName: 'DailyLogs', Key: { groupIdUserId: 'group-1#user-1', date: '2026-06-01' } })
+      .resolves({ Item: undefined });
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(UpdateCommand).resolves({});
+
+    (judgeGoalContribution as jest.Mock).mockResolvedValue({ contributes: false, reason: 'Not related.' });
+    (matchAdhocChallenge as jest.Mock).mockResolvedValue({
+      matched: true,
+      challengeId: 'challenge-1',
+      pointValue: 5,
+    });
+
+    const event = buildEvent({
+      date: '2026-06-01',
+      minutesWorkedOut: 15,
+      description: 'Burpee marathon',
+      metricValueAfter: 7.5,
+    });
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(201);
+    const body = JSON.parse(result.body);
+    expect(body.adhocBonusPoint).toBe(5);
+    expect(body.totalPointsForDay).toBe(6); // 1 duration point + 5 challenge points
   });
 
   it('does not overwrite currentMetricValue when backfilling a date before a later log', async () => {

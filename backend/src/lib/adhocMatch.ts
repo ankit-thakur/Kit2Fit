@@ -5,6 +5,7 @@ import { judgeChallengeMatch } from './llmJudge';
 export interface AdhocMatchResult {
   matched: boolean;
   challengeId?: string;
+  pointValue?: number;
 }
 
 export async function matchAdhocChallenge(
@@ -30,5 +31,12 @@ export async function matchAdhocChallenge(
     challenges: challenges.map((c) => ({ challengeId: c.challengeId, title: c.title, description: c.description })),
   });
 
-  return result.matched ? { matched: true, challengeId: result.challengeId } : { matched: false };
+  if (!result.matched) {
+    return { matched: false };
+  }
+
+  const matchedChallenge = challenges.find((c) => c.challengeId === result.challengeId);
+  const pointValue = typeof matchedChallenge?.pointValue === 'number' ? matchedChallenge.pointValue : 1;
+
+  return { matched: true, challengeId: result.challengeId, pointValue };
 }
