@@ -4,7 +4,7 @@ import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { requireMembership } from '../../lib/groups';
 import { json, handleErrors, HttpError } from '../../lib/http';
-import { calculateDurationPoints, calculateTotalPoints } from '../../lib/points';
+import { calculateDurationPoints, calculateTotalPoints, DEFAULT_WORKOUT_DURATION_CAP_MINUTES } from '../../lib/points';
 import { judgeGoalContribution } from '../../lib/llmJudge';
 import { matchAdhocChallenge } from '../../lib/adhocMatch';
 import { hasLaterLog } from '../../lib/logs';
@@ -36,13 +36,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw new HttpError(409, 'A log already exists for this date; use update instead');
     }
 
-    const durationPoints = calculateDurationPoints(minutesWorkedOut);
     const previousMetricValue = membership.currentMetricValue ?? 0;
     const isDailyHabit =
       isGoalCategory(membership.goalCategory) &&
       GOAL_CATEGORIES[membership.goalCategory].goalType === 'daily_habit';
 
-    const [judgeResult, adhocResult, isBackfill] = await Promise.all([
+    const [judgeResult, adhocResult, isBackfill, groupRecord] = await Promise.all([
       metricValueAfter === null
         ? judgeGoalContribution({
             workoutDescription: description,
@@ -52,7 +51,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         : Promise.resolve({ contributes: false, reason: '' }),
       matchAdhocChallenge(groupId, date, description),
       hasLaterLog(groupIdUserId, date),
+      ddb.send(new GetCommand({ TableName: Tables.groups, Key: { groupId } })),
     ]);
+
+    const workoutDurationCapMinutes =
+      (groupRecord.Item?.workoutDurationCapMinutes as number | undefined) ?? DEFAULT_WORKOUT_DURATION_CAP_MINUTES;
+    const durationPoints = calculateDurationPoints(minutesWorkedOut, workoutDurationCapMinutes);
 
     const metricMovedFavorably =
       metricValueAfter !== null &&
@@ -75,7 +79,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       llmBonusPoint = judgeResult.contributes ? 1 : 0;
       llmBonusReason = judgeResult.reason;
     }
-    const adhocBonusPoint = adhocResult.matched ? 1 : 0;
+    const adhocBonusPoint = adhocResult.matched ? (adhocResult.pointValue ?? 1) : 0;
 
     const kitUserId = getKitUserId();
     const isKit = kitUserId !== null && userId === kitUserId;

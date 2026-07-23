@@ -240,6 +240,7 @@ export class Kit2FitStack extends cdk.Stack {
     this.dailyLogsTable.grantReadWriteData(createLogFn);
     this.groupMembershipsTable.grantReadWriteData(createLogFn);
     this.adhocChallengesTable.grantReadData(createLogFn);
+    this.groupsTable.grantReadData(createLogFn);
     anthropicApiKeySecret.grantRead(createLogFn);
 
     const listMyLogsFn = mkFn('ListMyLogsFn', 'src/handlers/logs/listMyLogs.ts');
@@ -249,6 +250,7 @@ export class Kit2FitStack extends cdk.Stack {
     this.dailyLogsTable.grantReadWriteData(updateLogFn);
     this.groupMembershipsTable.grantReadWriteData(updateLogFn);
     this.adhocChallengesTable.grantReadData(updateLogFn);
+    this.groupsTable.grantReadData(updateLogFn);
     anthropicApiKeySecret.grantRead(updateLogFn);
 
     // --- Ad-hoc challenges domain ---
@@ -269,6 +271,13 @@ export class Kit2FitStack extends cdk.Stack {
     );
     this.adhocChallengesTable.grantWriteData(deleteChallengeFn);
     this.groupMembershipsTable.grantReadData(deleteChallengeFn);
+
+    const updateChallengeFn = mkFn(
+      'UpdateChallengeFn',
+      'src/handlers/challenges/updateChallenge.ts',
+    );
+    this.adhocChallengesTable.grantReadWriteData(updateChallengeFn);
+    this.groupMembershipsTable.grantReadData(updateChallengeFn);
 
     // --- Dashboard domain ---
     const getLeaderboardFn = mkFn('GetLeaderboardFn', 'src/handlers/dashboard/getLeaderboard.ts');
@@ -343,9 +352,9 @@ export class Kit2FitStack extends cdk.Stack {
     const challenges = group.addResource('challenges');
     challenges.addMethod('POST', new apigateway.LambdaIntegration(createChallengeFn), withAuth);
     challenges.addMethod('GET', new apigateway.LambdaIntegration(listChallengesFn), withAuth);
-    challenges
-      .addResource('{challengeId}')
-      .addMethod('DELETE', new apigateway.LambdaIntegration(deleteChallengeFn), withAuth);
+    const challenge = challenges.addResource('{challengeId}');
+    challenge.addMethod('DELETE', new apigateway.LambdaIntegration(deleteChallengeFn), withAuth);
+    challenge.addMethod('PUT', new apigateway.LambdaIntegration(updateChallengeFn), withAuth);
 
     const dashboard = group.addResource('dashboard');
     dashboard

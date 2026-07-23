@@ -4,6 +4,7 @@ import { TransactWriteCommand, type TransactWriteCommandInput } from '@aws-sdk/l
 import { ddb, Tables } from '../../lib/dynamo';
 import { getUserId } from '../../lib/auth';
 import { json, handleErrors, HttpError } from '../../lib/http';
+import { DEFAULT_WORKOUT_DURATION_CAP_MINUTES } from '../../lib/points';
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   return handleErrors(async () => {
@@ -16,6 +17,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         400,
         'name, goalCategory, challengeStartDate, and challengeEndDate are required',
       );
+    }
+
+    let workoutDurationCapMinutes = DEFAULT_WORKOUT_DURATION_CAP_MINUTES;
+    if (body.workoutDurationCapMinutes !== undefined) {
+      if (typeof body.workoutDurationCapMinutes !== 'number' || body.workoutDurationCapMinutes <= 0) {
+        throw new HttpError(400, 'workoutDurationCapMinutes must be a positive number');
+      }
+      workoutDurationCapMinutes = body.workoutDurationCapMinutes;
     }
 
     const groupId = randomUUID();
@@ -33,6 +42,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
             challengeStartDate,
             challengeEndDate,
             adminUserId: userId,
+            workoutDurationCapMinutes,
             createdAt: now,
           },
         },
@@ -80,6 +90,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     await ddb.send(new TransactWriteCommand({ TransactItems: transactItems }));
 
-    return json(201, { groupId, name, goalCategory, challengeStartDate, challengeEndDate });
+    return json(201, {
+      groupId,
+      name,
+      goalCategory,
+      challengeStartDate,
+      challengeEndDate,
+      workoutDurationCapMinutes,
+    });
   });
 }

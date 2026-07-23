@@ -13,7 +13,7 @@ export interface CreateLogResult {
   durationPoints: number;
   llmBonusPoint: 0 | 1;
   llmBonusReason: string;
-  adhocBonusPoint: 0 | 1;
+  adhocBonusPoint: number;
   kitBonusPoint: 0 | 1;
   totalPointsForDay: number;
 }

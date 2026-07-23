@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MAX_DURATION_POINTS, MINUTES_PER_POINT } from '@shared/points';
+import { getMaxDurationPoints, MINUTES_PER_POINT } from '@shared/points';
 import type { AdhocChallenge } from '@shared/types';
 import { listChallenges } from '../api/groups';
 import type { MyGroup } from '../api/groups';
@@ -47,13 +47,14 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
 
         <div className="mb-4 space-y-2 rounded-lg bg-teal-pale p-3 text-sm text-teal-dark">
           <p>
-            +1 point per {MINUTES_PER_POINT} minutes worked out, up to {MAX_DURATION_POINTS} points/day.
+            +1 point per {MINUTES_PER_POINT} minutes worked out, up to {getMaxDurationPoints(group.workoutDurationCapMinutes)}{' '}
+            points/day ({group.workoutDurationCapMinutes} min cap).
           </p>
           <p>
             +1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your
             target.
           </p>
-          <p>+1 bonus point if today's workout matches an active group challenge.</p>
+          <p>Bonus points if today's workout matches an active group challenge (points vary by challenge).</p>
           <p>+1 bonus point if your workout score (before this bonus) beats Kit's total for the day.</p>
         </div>
 
@@ -68,7 +69,10 @@ export function RulesAndScoringModal({ group, onClose }: { group: MyGroup; onClo
           ) : (
             challenges.map((challenge) => (
               <div key={challenge.challengeId} className="rounded-lg bg-gray-50 px-3 py-2">
-                <p className="text-sm font-semibold text-charcoal">{challenge.title}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-charcoal">{challenge.title}</p>
+                  <span className="text-xs font-semibold text-teal-dark">+{challenge.pointValue} pts</span>
+                </div>
                 <p className="mt-0.5 text-xs text-gray-600">{challenge.description}</p>
                 <p className="mt-1 text-xs text-gray-400">{formatDaysLeft(challenge.endDate)}</p>
               </div>

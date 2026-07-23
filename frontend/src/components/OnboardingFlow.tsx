@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MAX_DURATION_POINTS, MINUTES_PER_POINT } from '@shared/points';
+import { getMaxDurationPoints, MINUTES_PER_POINT } from '@shared/points';
 import { GOAL_CATEGORY_OPTIONS, type GoalCategory } from '@shared/goalCategories';
 import type { MyGroup } from '../api/groups';
 import { updateMemberGoal, completeOnboarding } from '../api/groups';
@@ -100,10 +100,11 @@ export function OnboardingFlow({
         {step === 'points' && (
           <div className="space-y-2 rounded-lg bg-teal-pale p-3 text-sm text-teal-dark">
             <p>
-              +1 point per {MINUTES_PER_POINT} minutes worked out, up to {MAX_DURATION_POINTS} points/day.
+              +1 point per {MINUTES_PER_POINT} minutes worked out, up to {getMaxDurationPoints(group.workoutDurationCapMinutes)}{' '}
+              points/day ({group.workoutDurationCapMinutes} min cap).
             </p>
             <p>+1 bonus point if today's workout contributes to your goal, or your tracked number moves toward your target.</p>
-            <p>+1 bonus point if today's workout matches an active group challenge.</p>
+            <p>Bonus points if today's workout matches an active group challenge (points vary by challenge).</p>
             <p>+1 bonus point if your score beats Kit's total for the day.</p>
           </div>
         )}

@@ -9,6 +9,7 @@ import {
   createChallenge,
   listChallenges,
   deleteChallenge,
+  updateChallenge,
 } from '../api/groups';
 import { getLeaderboard } from '../api/dashboard';
 
@@ -24,10 +25,18 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
     goalCategory: '',
     challengeStartDate: '',
     challengeEndDate: '',
+    workoutDurationCapMinutes: '',
   });
   const [memberEmail, setMemberEmail] = useState('');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [challengeForm, setChallengeForm] = useState({ title: '', description: '', startDate: '', endDate: '' });
+  const [challengeForm, setChallengeForm] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    pointValue: '1',
+  });
+  const [challengePointDrafts, setChallengePointDrafts] = useState<Map<string, string>>(new Map());
 
   async function refresh() {
     setIsLoading(true);
@@ -41,11 +50,13 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
       setGroup(groupRes);
       setNicknamesById(new Map(leaderboardRes.leaderboard.map((e) => [e.userId, e.nickname])));
       setChallenges(challengesRes.challenges);
+      setChallengePointDrafts(new Map(challengesRes.challenges.map((c) => [c.challengeId, String(c.pointValue)])));
       setSettingsForm({
         name: groupRes.name,
         goalCategory: groupRes.goalCategory,
         challengeStartDate: groupRes.challengeStartDate.slice(0, 10),
         challengeEndDate: groupRes.challengeEndDate.slice(0, 10),
+        workoutDurationCapMinutes: String(groupRes.workoutDurationCapMinutes),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load group');
@@ -62,7 +73,13 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
   async function handleSaveSettings(e: FormEvent) {
     e.preventDefault();
     try {
-      await updateGroup(groupId, settingsForm);
+      await updateGroup(groupId, {
+        name: settingsForm.name,
+        goalCategory: settingsForm.goalCategory,
+        challengeStartDate: settingsForm.challengeStartDate,
+        challengeEndDate: settingsForm.challengeEndDate,
+        workoutDurationCapMinutes: Number(settingsForm.workoutDurationCapMinutes),
+      });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update group');
@@ -106,8 +123,9 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
         description: challengeForm.description,
         startDate: challengeForm.startDate,
         endDate: challengeForm.endDate,
+        pointValue: Number(challengeForm.pointValue) || 1,
       });
-      setChallengeForm({ title: '', description: '', startDate: '', endDate: '' });
+      setChallengeForm({ title: '', description: '', startDate: '', endDate: '', pointValue: '1' });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create challenge');
@@ -120,6 +138,21 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete challenge');
+    }
+  }
+
+  async function handleSaveChallengePoints(challengeId: string) {
+    const draft = challengePointDrafts.get(challengeId);
+    const pointValue = Number(draft);
+    if (!draft || !Number.isInteger(pointValue) || pointValue <= 0) {
+      setError('Points must be a positive whole number');
+      return;
+    }
+    try {
+      await updateChallenge(groupId, challengeId, { pointValue });
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update challenge points');
     }
   }
 
@@ -163,6 +196,17 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
               />
             </div>
+            <label className="block text-xs text-gray-500">
+              Workout duration cap (minutes) — max minutes/day that count toward points
+              <input
+                type="number"
+                min={1}
+                required
+                value={settingsForm.workoutDurationCapMinutes}
+                onChange={(e) => setSettingsForm((p) => ({ ...p, workoutDurationCapMinutes: e.target.value }))}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              />
+            </label>
             <button type="submit" className="w-full rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark">
               Save settings
             </button>
@@ -218,17 +262,39 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-gray-600">Surprise challenges (catch em slackin cuh)</h4>
             {challenges.map((challenge) => (
-              <div key={challenge.challengeId} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
-                <span className="text-sm text-gray-700">
-                  {challenge.title} (
-                  {challenge.startDate === challenge.endDate
-                    ? challenge.startDate
-                    : `${challenge.startDate} → ${challenge.endDate}`}
-                  )
-                </span>
-                <button onClick={() => handleDeleteChallenge(challenge.challengeId)} className="text-xs text-red-500">
-                  Delete
-                </button>
+              <div key={challenge.challengeId} className="space-y-1 rounded-lg bg-gray-50 px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">
+                    {challenge.title} (
+                    {challenge.startDate === challenge.endDate
+                      ? challenge.startDate
+                      : `${challenge.startDate} → ${challenge.endDate}`}
+                    )
+                  </span>
+                  <button onClick={() => handleDeleteChallenge(challenge.challengeId)} className="text-xs text-red-500">
+                    Delete
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-gray-500">
+                    Points awarded
+                    <input
+                      type="number"
+                      min={1}
+                      value={challengePointDrafts.get(challenge.challengeId) ?? String(challenge.pointValue)}
+                      onChange={(e) =>
+                        setChallengePointDrafts((prev) => new Map(prev).set(challenge.challengeId, e.target.value))
+                      }
+                      className="ml-2 w-16 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900"
+                    />
+                  </label>
+                  <button
+                    onClick={() => handleSaveChallengePoints(challenge.challengeId)}
+                    className="text-xs font-semibold text-teal-dark"
+                  >
+                    Save points
+                  </button>
+                </div>
               </div>
             ))}
             <form onSubmit={handleCreateChallenge} className="space-y-2">
@@ -271,6 +337,17 @@ export function GroupAdminPanel({ groupId, onClose }: { groupId: string; onClose
                   />
                 </label>
               </div>
+              <label className="block text-xs text-gray-500">
+                Points awarded for completing this challenge
+                <input
+                  required
+                  type="number"
+                  min={1}
+                  value={challengeForm.pointValue}
+                  onChange={(e) => setChallengeForm((p) => ({ ...p, pointValue: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                />
+              </label>
               <button type="submit" className="w-full rounded-lg bg-teal py-2 font-semibold text-white hover:bg-teal-dark">
                 Add challenge
               </button>
