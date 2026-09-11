@@ -6,6 +6,8 @@ demo or comparison — and **v2 is where all new work happens**.
 
 The two share sign-in. They share nothing else.
 
+For what v2 actually changes, see [v2-spec.md](./v2-spec.md).
+
 ---
 
 ## What is shared and what is not
