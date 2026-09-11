@@ -5,6 +5,41 @@
  * `CompletionDetail` is recorded and displayed but never reaches adherence.
  */
 
+export type GroupRole = 'admin' | 'member';
+
+export interface Group {
+  groupId: string;
+  name: string;
+  /**
+   * IANA zone, e.g. "America/Los_Angeles". A challenge is scored per group, so
+   * "today" and "this week" have to mean the same thing for every member — a
+   * per-user zone would put two members' completions in different weeks and
+   * make the rollup ambiguous.
+   */
+  timeZone: string;
+  /** YYYY-MM-DD, inclusive. */
+  challengeStartDate: string;
+  challengeEndDate: string;
+  /** Ceiling on each member's total weekly commitments (spec R8). */
+  commitmentCap: number;
+  adminUserId: string;
+  createdAt: string;
+}
+
+/**
+ * Membership carries no goal. Pledges are their own records keyed by
+ * membership, because a member can hold several (spec R2) and the same person
+ * can pledge differently in different groups.
+ */
+export interface GroupMembership {
+  groupId: string;
+  userId: string;
+  role: GroupRole;
+  joinedAt: string;
+  /** Set once the member has set pledges and seen the intro. */
+  onboardedAt?: string;
+}
+
 /** What a pledge tracks alongside its completions. Tracked, never scored. */
 export type MetricKind = 'weight' | 'reps' | 'lift' | 'none';
 

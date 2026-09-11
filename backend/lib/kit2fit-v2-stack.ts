@@ -4,6 +4,10 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as path from 'path';
 
 export interface Kit2FitV2StackProps extends cdk.StackProps {
   /** Cognito user pool owned by the v1 stack. Shared so members keep their sign-in. */
@@ -12,6 +16,8 @@ export interface Kit2FitV2StackProps extends cdk.StackProps {
   readonly sharedUsersTableName: string;
   /** Profile pictures bucket owned by the v1 stack. */
   readonly sharedProfilePicturesBucketName: string;
+  /** Where invite links point. Configured per deployment, never hardcoded. */
+  readonly appBaseUrl: string;
 }
 
 /**
@@ -168,17 +174,102 @@ export class Kit2FitV2Stack extends cdk.Stack {
     // No Anthropic secret: v2 has no LLM judge. A completion is a fact the
     // member asserts, not a judgment the system makes.
 
-    // --- Handlers and API ---
-    // Deliberately absent. An apigateway.RestApi with no methods fails to
-    // deploy, so the API is added with the first handler rather than left as an
-    // empty shell. Wire it against `this.userPool` with a
-    // CognitoUserPoolsAuthorizer so v2 accepts tokens from the shared pool.
-    //
-    // Give every NodejsFunction `bundling: { tsconfig: '<backend>/tsconfig.json' }`
-    // so esbuild resolves the `@shared/*` alias. v2 handlers import scoring logic
-    // from shared/v2 rather than copying it into src/lib the way v1 did — a copy
-    // of adherence would let the stored score and the displayed score drift.
+    // --- Handlers ---
+    // `tsconfig` is what lets esbuild resolve the `@shared/*` alias, so handlers
+    // import scoring logic from shared/v2 rather than copying it into src/lib the
+    // way v1 did. A copy of adherence would let the stored score and the
+    // displayed score drift, which for scoring is a correctness bug.
+    const tsconfig = path.join(__dirname, '../tsconfig.json');
 
+    const tableEnv = {
+      USERS_TABLE: props.sharedUsersTableName,
+      V2_GROUPS_TABLE: this.groupsTable.tableName,
+      V2_GROUP_MEMBERSHIPS_TABLE: this.groupMembershipsTable.tableName,
+      V2_PLEDGES_TABLE: this.pledgesTable.tableName,
+      V2_COMPLETIONS_TABLE: this.completionsTable.tableName,
+      V2_WEEK_SCORES_TABLE: this.weekScoresTable.tableName,
+      V2_EVENTS_TABLE: this.eventsTable.tableName,
+      V2_EVENT_RSVPS_TABLE: this.eventRsvpsTable.tableName,
+      PROFILE_PICTURES_BUCKET: props.sharedProfilePicturesBucketName,
+    };
+
+    const mkFn = (id: string, entry: string, extraEnv: Record<string, string> = {}) =>
+      new lambdaNode.NodejsFunction(this, id, {
+        entry: path.join(__dirname, '../src/v2/handlers', entry),
+        runtime: lambda.Runtime.NODEJS_20_X,
+        timeout: cdk.Duration.seconds(15),
+        bundling: { sourceMap: false, tsconfig },
+        environment: { ...tableEnv, ...extraEnv },
+      });
+
+    const getMeFn = mkFn('V2GetMeFn', 'users/getMe.ts');
+    const updateMeFn = mkFn('V2UpdateMeFn', 'users/updateMe.ts');
+    const createGroupFn = mkFn('V2CreateGroupFn', 'groups/createGroup.ts');
+    const listMyGroupsFn = mkFn('V2ListMyGroupsFn', 'groups/listMyGroups.ts');
+    const getGroupFn = mkFn('V2GetGroupFn', 'groups/getGroup.ts');
+    const createInviteLinkFn = mkFn('V2CreateInviteLinkFn', 'groups/createInviteLink.ts', {
+      INVITE_LINK_SECRET_ARN: this.inviteLinkSecret.secretArn,
+      APP_BASE_URL: props.appBaseUrl,
+    });
+    const joinViaInviteFn = mkFn('V2JoinViaInviteFn', 'groups/joinViaInvite.ts', {
+      INVITE_LINK_SECRET_ARN: this.inviteLinkSecret.secretArn,
+    });
+
+    // Grants on the imported Users table attach to these roles, not to the
+    // table, so the v1 stack needs no change to permit v2's access.
+    this.usersTable.grantReadData(getMeFn);
+    this.usersTable.grantReadWriteData(updateMeFn);
+    this.usersTable.grantReadData(getGroupFn);
+
+    this.groupsTable.grantWriteData(createGroupFn);
+    this.groupMembershipsTable.grantWriteData(createGroupFn);
+    this.groupsTable.grantReadData(listMyGroupsFn);
+    this.groupMembershipsTable.grantReadData(listMyGroupsFn);
+    this.groupsTable.grantReadData(getGroupFn);
+    this.groupMembershipsTable.grantReadData(getGroupFn);
+    this.groupMembershipsTable.grantReadData(createInviteLinkFn);
+    this.groupsTable.grantReadData(joinViaInviteFn);
+    this.groupMembershipsTable.grantWriteData(joinViaInviteFn);
+    this.inviteLinkSecret.grantRead(createInviteLinkFn);
+    this.inviteLinkSecret.grantRead(joinViaInviteFn);
+
+    // --- API ---
+    const api = new apigateway.RestApi(this, 'Kit2FitV2Api', {
+      restApiName: 'Kit2Fit v2 API',
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ['Content-Type', 'Authorization'],
+      },
+    });
+
+    // Tokens from the shared pool, so a member signs in once and both apps
+    // accept them.
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'V2Authorizer', {
+      cognitoUserPools: [this.userPool],
+    });
+    const withAuth = { authorizer, authorizationType: apigateway.AuthorizationType.COGNITO };
+
+    const me = api.root.addResource('users').addResource('me');
+    me.addMethod('GET', new apigateway.LambdaIntegration(getMeFn), withAuth);
+    me.addMethod('PUT', new apigateway.LambdaIntegration(updateMeFn), withAuth);
+
+    const groups = api.root.addResource('groups');
+    groups.addMethod('POST', new apigateway.LambdaIntegration(createGroupFn), withAuth);
+    groups.addMethod('GET', new apigateway.LambdaIntegration(listMyGroupsFn), withAuth);
+    groups.addResource('join').addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(joinViaInviteFn),
+      withAuth,
+    );
+
+    const group = groups.addResource('{groupId}');
+    group.addMethod('GET', new apigateway.LambdaIntegration(getGroupFn), withAuth);
+    group
+      .addResource('invite-link')
+      .addMethod('POST', new apigateway.LambdaIntegration(createInviteLinkFn), withAuth);
+
+    new cdk.CfnOutput(this, 'V2ApiUrl', { value: api.url });
     new cdk.CfnOutput(this, 'V2UserPoolId', { value: this.userPool.userPoolId });
     new cdk.CfnOutput(this, 'V2UserPoolClientId', {
       value: this.userPoolClient.userPoolClientId,

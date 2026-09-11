@@ -7,6 +7,9 @@ import {
   isSameWeek,
   weekDates,
   weekStart,
+  isValidTimeZone,
+  todayInTimeZone,
+  isWithinChallenge,
 } from './week';
 
 describe('week boundaries', () => {
@@ -93,5 +96,39 @@ describe('challenge day number', () => {
 
   it('goes negative before the challenge starts', () => {
     expect(challengeDayNumber('2026-09-07', '2026-09-05')).toBe(-2);
+  });
+});
+
+describe('time zones', () => {
+  it('accepts real IANA zones and rejects nonsense', () => {
+    expect(isValidTimeZone('America/Los_Angeles')).toBe(true);
+    expect(isValidTimeZone('UTC')).toBe(true);
+    expect(isValidTimeZone('Mars/Olympus_Mons')).toBe(false);
+    expect(isValidTimeZone('')).toBe(false);
+  });
+
+  it('resolves the group date, not the runtime date', () => {
+    // 2026-09-12T03:00Z is still the 11th in Los Angeles.
+    const instant = new Date('2026-09-12T03:00:00Z');
+    expect(todayInTimeZone('UTC', instant)).toBe('2026-09-12');
+    expect(todayInTimeZone('America/Los_Angeles', instant)).toBe('2026-09-11');
+    expect(todayInTimeZone('Asia/Tokyo', instant)).toBe('2026-09-12');
+  });
+
+  it('pads single-digit months and days', () => {
+    expect(todayInTimeZone('UTC', new Date('2026-01-05T12:00:00Z'))).toBe('2026-01-05');
+  });
+
+  it('throws on an unknown zone rather than silently using UTC', () => {
+    expect(() => todayInTimeZone('Nowhere/Anywhere')).toThrow();
+  });
+});
+
+describe('challenge window', () => {
+  it('includes both end dates', () => {
+    expect(isWithinChallenge('2026-09-07', '2026-09-07', '2026-11-01')).toBe(true);
+    expect(isWithinChallenge('2026-11-01', '2026-09-07', '2026-11-01')).toBe(true);
+    expect(isWithinChallenge('2026-09-06', '2026-09-07', '2026-11-01')).toBe(false);
+    expect(isWithinChallenge('2026-11-02', '2026-09-07', '2026-11-01')).toBe(false);
   });
 });

@@ -96,14 +96,30 @@ Then fill in `backend/cdk.json`:
 ```json
 "sharedUserPoolId": "us-east-1_XXXXXXXXX",
 "sharedUsersTableName": "Kit2Fit-Users",
-"sharedProfilePicturesBucketName": "kit2fitstack-profilepicturesbucket-xxxxxxxx"
+"sharedProfilePicturesBucketName": "kit2fitstack-profilepicturesbucket-xxxxxxxx",
+"v2AppBaseUrl": "https://kit2fit-v2.pages.dev"
 ```
+
+`v2AppBaseUrl` is where invite links point. It is context-driven rather than
+hardcoded, which is what went wrong in v1 (`kit2fit-stack.ts:224`). It defaults to
+`http://localhost:5173` for local work.
 
 ```bash
 cd backend && npx cdk deploy Kit2FitV2Stack
 ```
 
 ---
+
+## Dates and time zones
+
+Each group carries an IANA `timeZone`, set when the group is created. A challenge
+is scored per group, so "today" and "this week" have to mean the same thing for
+every member — a per-user zone would land two members' completions in different
+weeks and make the weekly rollup ambiguous.
+
+Lambdas run in UTC, so the server resolves a group's date with
+`todayInTimeZone(group.timeZone)` from `shared/v2/week.ts`. Without it, a group in
+Los Angeles would roll over to the next day at 5pm local.
 
 ## v2 key shapes
 

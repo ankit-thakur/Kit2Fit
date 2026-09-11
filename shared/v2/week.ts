@@ -82,3 +82,49 @@ export function daysLeftInWeek(date: string, weekStartsOn: number = WEEK_STARTS_
 export function challengeDayNumber(challengeStartDate: string, date: string): number {
   return daysBetween(challengeStartDate, date);
 }
+
+/**
+ * Whether a string names a time zone this runtime knows.
+ *
+ * There is no list to check against, so the only reliable test is asking
+ * Intl to use it.
+ */
+export function isValidTimeZone(timeZone: string): boolean {
+  if (!timeZone) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Today's calendar date in a group's time zone, as YYYY-MM-DD.
+ *
+ * Built from formatToParts rather than a locale that happens to format ISO,
+ * so the result does not depend on the runtime's default locale. Lambdas run
+ * in UTC, so without this a group in Los Angeles would roll over to the next
+ * day at 5pm local.
+ */
+export function todayInTimeZone(timeZone: string, now: Date = new Date()): string {
+  if (!isValidTimeZone(timeZone)) {
+    throw new Error(`Unknown time zone "${timeZone}"`);
+  }
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+/** Whether a date falls inside a challenge window, inclusive at both ends. */
+export function isWithinChallenge(date: string, startDate: string, endDate: string): boolean {
+  assertDate(date);
+  assertDate(startDate);
+  assertDate(endDate);
+  return date >= startDate && date <= endDate;
+}

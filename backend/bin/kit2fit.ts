@@ -34,6 +34,7 @@ if (sharedUserPoolId && sharedUsersTableName && sharedProfilePicturesBucketName)
     sharedUserPoolId,
     sharedUsersTableName,
     sharedProfilePicturesBucketName,
+    appBaseUrl: (app.node.tryGetContext('v2AppBaseUrl') as string | undefined) ?? 'http://localhost:5173',
   });
 } else {
   console.warn(

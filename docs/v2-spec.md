@@ -263,6 +263,16 @@ Dark base with bright accents, drawn from the existing tokens in
 
 ---
 
+## 8a. Dates
+
+A group carries an IANA `timeZone` fixed at creation, and every date is resolved
+in it server-side. Scoring is per group, so a per-user zone would put two
+members' completions in different weeks. `commitmentCap` (R8) is likewise stored
+per group rather than hardcoded.
+
+Still open: how a challenge that starts mid-week is handled — pro-rate week one,
+or make it unscored practice.
+
 ## 9. Data model
 
 `Completion` replaces the metric-comparison logic entirely — it is a fact, not a
@@ -286,6 +296,13 @@ WeekScore                       materialised at week close
   groupId, userId, weekStart
   done, pledged, adherencePct, fullWeek
   pledges[]        { pledgeId, completed, target, fullWeek }
+
+Group
+  groupId, name, timeZone, commitmentCap
+  challengeStartDate, challengeEndDate, adminUserId, createdAt
+
+GroupMembership                 no goal fields — pledges are separate
+  groupId, userId, role, joinedAt, onboardedAt?
 
 Event
   groupId, eventId, hostUserId
