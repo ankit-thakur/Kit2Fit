@@ -173,6 +173,11 @@ export class Kit2FitV2Stack extends cdk.Stack {
     // deploy, so the API is added with the first handler rather than left as an
     // empty shell. Wire it against `this.userPool` with a
     // CognitoUserPoolsAuthorizer so v2 accepts tokens from the shared pool.
+    //
+    // Give every NodejsFunction `bundling: { tsconfig: '<backend>/tsconfig.json' }`
+    // so esbuild resolves the `@shared/*` alias. v2 handlers import scoring logic
+    // from shared/v2 rather than copying it into src/lib the way v1 did — a copy
+    // of adherence would let the stored score and the displayed score drift.
 
     new cdk.CfnOutput(this, 'V2UserPoolId', { value: this.userPool.userPoolId });
     new cdk.CfnOutput(this, 'V2UserPoolClientId', {

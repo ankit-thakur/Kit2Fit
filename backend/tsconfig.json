@@ -2,8 +2,25 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": "..",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": [
+        "../shared/*"
+      ]
+    }
   },
-  "include": ["bin/**/*.ts", "lib/**/*.ts", "src/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules", "cdk.out", "dist"]
+  "include": [
+    "bin/**/*.ts",
+    "lib/**/*.ts",
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "dist",
+    "../shared/**/*.test.ts"
+  ]
 }

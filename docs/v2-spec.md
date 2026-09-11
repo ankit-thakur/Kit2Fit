@@ -284,7 +284,8 @@ Completion
 
 WeekScore                       materialised at week close
   groupId, userId, weekStart
-  completed, target, adherencePct, fullWeek
+  done, pledged, adherencePct, fullWeek
+  pledges[]        { pledgeId, completed, target, fullWeek }
 
 Event
   groupId, eventId, hostUserId
@@ -294,6 +295,12 @@ Event
 EventRsvp
   eventId, userId, mode         in_person | virtual
 ```
+
+`WeekScore` carries a per-pledge breakdown because R7 makes the streak a
+*per-pledge* unit: a single aggregate `fullWeek` cannot answer "how many weeks
+running have I kept my strength pledge". `done` and `pledged` are the source of
+truth — `adherencePct` is rounded for display, so averages across weeks are
+computed from the raw counts to avoid rounding drift.
 
 Gone from v1: `previousMetricValue`, `currentMetricValue` comparisons,
 `durationPoints`, `kitBonusPoint`, and the LLM judge that decided whether a workout
