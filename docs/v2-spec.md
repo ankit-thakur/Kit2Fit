@@ -67,11 +67,25 @@ currency; the streak is the discrete one you brag about. Streaks are *per pledge
 not aggregate — a composite streak would make multi-pledge members structurally
 worse at streaks.
 
-**R8 — Total weekly commitments are capped.** Default 14. Without a ceiling, a
-member can pad with easy pledges to dilute misses.
+**R8 — At most three pledges, under a weekly commitment ceiling.** Three is the
+rule people are shown: it bounds the screen and the cognitive load. The ceiling
+(`Group.commitmentCap`, default 14) is a quiet backstop against *dilution* —
+padding a third slot with something you never miss to inflate your denominator.
+It surfaces only if someone hits it.
 
-**R9 — Pledges are set at challenge start, visible to the group, and locked.**
-Sandbagging is handled socially, not in code.
+Neither cap changes how adherence is computed. R2 still pools across whatever
+pledges a member holds, and R3 still holds — the cap only means the property
+matters across one to three pledges rather than arbitrarily many. Do not
+"simplify" later to per-pledge averaging.
+
+**R9 — Pledges are visible, and changes take effect next week.** The current
+week is locked the moment it starts. A hard lock for the whole challenge is
+brittle — someone who pledges 5 and finds by week 2 that it was wrong is stuck
+failing for six weeks, which produces exactly the disengagement v2 exists to
+remove. Free editing is worse: it lets you lower a target on Sunday night to
+save a streak, which is the actual gaming vector. Next-week-effective changes
+block the rescue and allow the correction, and since R10 shows the pledge beside
+the score, the group sees what changed.
 
 **R10 — The leaderboard shows the pledge next to the score.** `Sam · 100% · 2
 runs/wk` beside `Dana · 86% · 7 moves/wk` is self-documenting. Score reliability;
@@ -112,21 +126,97 @@ whole thesis.
 
 ## 4. Logging
 
-**Log the activity, derive the completion.** One tap satisfies a pledge. Detail —
-what you did, how long, what you lifted, today's weigh-in — is optional, and it is
-what gives your tile something to show and the outcome charts their numbers.
+**Log the activity, derive the completion.** One tap satisfies a pledge.
 
-> **Detail never touches the score.** Ninety minutes and twenty minutes both produce
-> exactly one completion. This is the rule that stops volume creeping back in the way
-> it did in v1.
+### The screen
 
-Logging a metric alongside a completion marks that metric tracked for the day.
-Metrics render on the member's own charts and tile, and never in the standings.
+Two marks doing two different jobs:
+
+- **Today's pledges — a checklist.** One row per pledge, unchecked at the start
+  of each day, each row carrying the pledge name and a chevron.
+- **This week — dots.** The summary underneath, display only.
+
+Dots are right for weekly progress, where completions are interchangeable — any
+three workouts, not *these* three. A checklist is right for today, where the rows
+are distinct things you either did or didn't. Neither mark does the other's job
+well.
+
+### The interaction
+
+| State | Tap does |
+| --- | --- |
+| Row unchecked | Marks it complete **and** opens the detail sheet |
+| Row already checked | Opens the detail sheet in edit mode |
+| Inside the sheet | "Remove today's entry" undoes it |
+
+The completion is recorded before the sheet appears — never a form first. If
+filling in a form is the price of logging, people stop logging, and a tracker
+nobody updates is dead. The sheet opening is also what makes the interaction
+safe: you cannot accidentally complete something without it appearing to tell
+you, so undo is always one level deep and the checkbox never needs its own
+sub-44px hit target.
+
+### The detail sheet
+
+Everything in it is optional and none of it is scored.
+
+| Field | Purpose |
+| --- | --- |
+| Title | A few words — "Bench day". Shown on the member's tile |
+| Note | Longer, for their own record |
+| Photo | Shown on their tile |
+| Metric | One number, if the pledge defines one — "Bench 225", "Slept 8" |
+
+> **Detail never touches the score.** Ninety minutes and twenty minutes are both
+> exactly one completion. This is the rule that stops volume creeping back in the
+> way it did in v1 — and the reason there is no `minutes` field: duration is a
+> metric like any other if a member cares about it, never a first-class one.
+
+### Metrics
+
+A metric is a named number recorded on a date. Some belong to a pledge and are
+captured when it is completed; some belong to the day and can be recorded on a
+rest day. Those are the same record with the pledge left off, not two systems:
+
+```
+MetricEntry { groupIdUserId, date, metricKey, value, pledgeId? }
+```
+
+The distinction matters because weight is the metric people most want to track
+and rest days are exactly when they weigh in. Hang it off completions only and
+the series goes gappy — which is v1's jagged-graph problem returning in a new
+costume.
+
+A pledge names its own metric (`metricLabel`, `metricUnit`) rather than picking
+from a list of kinds. Freeform beats an enum here for the same reason v1's
+`goalCategory` failed: a fixed vocabulary never fits everyone's goal.
+
+### No verification
+
+Nothing checks whether the activity matches the pledge. A completion is a fact
+the member asserts, and the LLM judge is gone entirely.
+
+The consequence is that **pledge naming carries the weight instead**. Someone who
+writes "Bench press 225" has painted themselves into a corner on a day they swim;
+"Strength" has not. One line of onboarding copy — *name it broadly enough that a
+good week counts* — does more here than any validation would.
+
+### Backfill
+
+Logging stays open for the previous week through **Monday**, then seals. You can
+recover a day you forgot; you cannot repair a streak three weeks later.
+
+This moves when standings settle. A week's `WeekScore` is written **Tuesday
+00:00 group time**, not Sunday midnight, because Monday's entries can still
+change it. During Monday, last week reads as provisional, and a Monday backfill
+that completes a target extends the streak — which is the point of the grace
+period.
 
 ### Charts
 
-- **Noisy metrics** (weight): a 7-day trailing average as the line, raw weigh-ins as
-  faded points behind it. Never plot raw dailies as the primary series.
+- **Noisy metrics** (weight): a 7-day trailing average as the line, raw
+  weigh-ins as faded points behind it. Never plot raw dailies as the primary
+  series.
 - **Step metrics** (rep max, lift PR): a step chart, not a line — a pull-up max
   genuinely is flat until it isn't.
 - **Adherence**: weekly bars, bounded 0–100.
@@ -175,15 +265,20 @@ coming and in which mode.
 
 ### Lifecycle
 
-The card never disappears — it *decays into a tile*, so the event ends by becoming
-the group photo rather than being deleted.
+The card stays in place and changes what it holds. It does **not** become a tile
+of its own: one tile means one person, and a combined event tile would break the
+rule that makes the grid readable.
 
-| Window | Phase | What it is |
+| Window | Phase | The card is |
 | --- | --- | --- |
-| until start | Upcoming | Join card pinned above the tile grid, both join modes offered |
-| start → +3h | Live | Reads "happening now". Late joins still accepted |
-| +3h → midnight | Wrap | Collapses into the grid as a shared photo slot every attendee can add to |
-| next day | Done | An ordinary tile carrying the group photo |
+| until start | Upcoming | Join card above the grid — when, where, what, who is coming |
+| start → +3h | Live | "Happening now". Late joins still accepted |
+| +3h → end of day | Recap | The join control becomes a small gallery of attendees' photos |
+| next day | Gone | Photos remain on each attendee's own tile |
+
+So the event has two views that do not fight: the card is the *together* view,
+tiles stay the *individual* view. Each attendee's photo lands on their own tile
+as well as in the gallery.
 
 Three hours, not one: people finish, shower, and post later. A short window kills the
 photo moment, which is the entire payoff. The organiser may close an event early but
@@ -195,6 +290,41 @@ never has to.
 - **Your week** — a secondary ingress while you're already logging.
 - **Dashboard empty state** — when nobody is hosting, the join slot reads "Nobody's
   hosting today — start something." The highest-intent moment in the app.
+
+### Notification
+
+An event nobody sees is useless, and a dashboard card only reaches people who
+happen to open the app. A 6pm run posted at 2pm needs a push.
+
+**The only push notification is an invitation.** Events are time-sensitive and
+low-volume — a few a week. Someone logging a workout is neither, and pushing it
+turns the app into noise. Anything else worth saying is a digest, not a push.
+
+The push opens a **brief event page**: when, where, what, who has RSVP'd and how,
+the two join buttons, and — once the event has run — somewhere to add a photo.
+
+**Delivery is Web Push + a service worker, with VAPID keys.** No vendor and no
+Firebase; the backend signs and sends with the `web-push` package from a Lambda.
+
+| Platform | Works |
+| --- | --- |
+| Android / Chrome | From an ordinary browser tab |
+| iOS / Safari | **Only once the app is added to the Home Screen** (iOS 16.4+) |
+| Desktop | From an ordinary tab |
+
+The iOS restriction is a platform limit, not a library one — FCM, OneSignal and
+everything else sit on the same Safari API and hit the identical wall. Switching
+libraries does not get past it. What follows from it:
+
+1. Ship a `manifest.json` and a service worker so the app is installable.
+2. Make "Add to Home Screen" an explicit onboarding step with instructions,
+   not something people are left to discover.
+3. Ask for notification permission **after** someone has joined a group and seen
+   the point — never on first load, where it is reflexively denied, and denial
+   is sticky.
+
+For a group of six who already know each other, "add this to your home screen"
+is a message you can send. At scale it would be a real funnel problem.
 
 ---
 
@@ -208,18 +338,26 @@ Three tabs: **Home · Your week · You**
 - Upcoming event card, if any
 - Member tile grid, 2 columns, daily rotation
 
-### Your week — `/week`
-- Aggregate adherence, settles Sunday
-- One card per pledge: tappable dots, fraction, per-pledge streak, log action
-- Optional detail entry — never scored
-- Tracked metric charts
+### Log — `/log`
+- **Today's pledges** as a checklist: name, chevron, tap to complete
+- Detail sheet on tap — title, note, photo, the pledge's metric
+- **This week** below: dots per pledge, fraction, per-pledge streak
+- Aggregate adherence; last week shows provisional through Monday
 - Secondary create-event ingress
+
+Named for the verb people come here for. The week summary lives inside it.
 
 ### You — `/you`
 - Profile: name, nickname, photo
-- A card per group; pledges nest inside each
+- A card per group; pledges nest inside each, up to three
+- Pledge editor: freeform label, times per week, optional metric label and unit
+- Commitment meter while editing — "8 of 14 committed"
 - Members, invite link, admin controls
 - Primary create-event entry point
+
+### Event — `/e/{eventId}`
+Where a push lands. When, where, what; who has RSVP'd and in which mode; the two
+join buttons; and after the event has run, somewhere to add a photo.
 
 > Pledges belong to a *membership*, not a user — the same person can run a 3×/week
 > strength pledge with friends and a different one at work. Any flat "your pledges"
@@ -279,18 +417,30 @@ or make it unscored practice.
 judgment, which is what kills the sawtooth at the root instead of patching it.
 
 ```
-Pledge
+Pledge                          at most 3 per membership
   groupId, userId, pledgeId
-  label            "Strength"
+  label            "Strength" — freeform, never an enum
   targetPerWeek    1-7
-  metricKind?      weight | reps | lift | none — tracked, never scored
-  lockedAt
+  metricLabel?     "Bench" — names the optional number
+  metricUnit?      "lbs"
+  effectiveFrom    week this version starts (R9: changes apply next week)
 
 Completion
   groupIdUserId, date, pledgeId
-  detail?          { minutes, note, metricValue } — optional, unscored
+  title?           a few words, shown on the member's tile
+  note?            longer, the member's own record
   photoKey?
   UNIQUE (userId, pledgeId, date)
+
+MetricEntry                     pledgeId omitted = a day metric like weight
+  groupIdUserId, date, metricKey
+  value
+  pledgeId?
+
+PushSubscription                one per device, not per user
+  userId, subscriptionId
+  endpoint, keys { p256dh, auth }
+  createdAt, lastSeenAt
 
 WeekScore                       materialised at week close
   groupId, userId, weekStart
@@ -312,6 +462,9 @@ Event
 EventRsvp
   eventId, userId, mode         in_person | virtual
 ```
+
+There is no `minutes` field. Duration is a metric like any other if a member
+cares about it — making it first-class is how v1 ended up scoring volume.
 
 `WeekScore` carries a per-pledge breakdown because R7 makes the streak a
 *per-pledge* unit: a single aggregate `fullWeek` cannot answer "how many weeks
@@ -339,17 +492,23 @@ DynamoDB key shapes for these tables are in [environments.md](./environments.md#
 
 ## 11. Sequencing
 
-Each phase is shippable on its own, and phase 2 should run for a real challenge
-before phase 3 is built.
+Each milestone is shippable on its own. The order is what a greenfield v2 stack
+allows, which is not the order a v1-modified-in-place would have taken: a
+completion carries a `pledgeId`, so pledges must exist before completions can.
 
-| Phase | Ships | Why here |
+| # | Ships | Why here |
 | --: | --- | --- |
-| 1 | Bug fixes on v1 | Keeps the current app usable while v2 is built. No redesign. |
-| 2 | Scoring reset: completions, adherence, streaks; metrics decoupled from points | Smallest change with the largest effect on the last-place problem. Test the thesis before building anything new. |
-| 3 | Pledges: real entity, multiple per membership, weekly targets, commitment cap | The schema migration. |
-| 4 | Group surface: member tiles, daily rotation, photos | Depends on completions carrying optional detail from phase 2. |
-| 5 | Events: create, RSVP modes, lifecycle, shared photo slot | The differentiator. Needs the tile grid to decay into. |
-| 6 | Charts per metric kind | Cosmetic until there's enough phase-3 data to plot. |
+| **M0** | Domain core: adherence, week math, rotation, under test | Pure functions, no AWS. Where the model can be subtly wrong, and the tests guard the invariants. ✅ |
+| **M1** | Identity + groups: API on the shared pool, invites | Proves the shared-identity decision end to end before anything depends on it. Backend ✅ |
+| **M2** | Pledges: up to three, targets, metric labels, commitment meter | The highest-stakes screen in the app. |
+| **M3** | Completions + the log screen | Checklist, detail sheet, metrics, Monday backfill. |
+| **M4** | Adherence + standings; week close Tuesday 00:00 | **The MVP — stop and run a real challenge here.** |
+| **M5** | Group board: member tiles, daily rotation, photos | Needs completions carrying titles and photos. |
+| **M6** | Push + PWA: manifest, service worker, subscriptions, send path | Independent of everything above, and it gates M7 being useful. |
+| **M7** | Events: create, RSVP modes, lifecycle, recap gallery | The differentiator. Needs push to reach anyone and the board to sit above. |
+| **M8** | Charts per metric kind | Cosmetic until there is data to plot. |
+
+Everything past M4 is downstream of a thesis only a real group can test.
 
 ---
 
@@ -374,6 +533,14 @@ the fun for whoever enjoyed the volume race. Keeping total minutes and longest
 session visible as unscored status is the hedge; a handicap system (score against
 your own prior baseline) preserves more tension if the group skews competitive.
 
-**Does "ate clean" survive contact with self-reporting?** It's fuzzy and
-unverifiable — the same surface that invited workarounds in v1. Tolerable while
-nothing rides on it but adherence to your own pledge; revisit if it's gamed.
+**Does a narrow pledge strand people?** With no verification, someone whose
+pledge is "Bench press" and who swims instead either checks it loosely or gets
+nothing — and the person having a rough week who managed a walk gets nothing
+either, which is the discouragement v2 exists to remove. Deliberately left
+straightforward for now: onboarding steers toward broad labels, and a separate
+unscored "logged something else" is the fallback if broad labels aren't enough.
+
+**Do standalone day metrics need surfacing?** `MetricEntry` supports a metric
+with no pledge, but only the per-pledge field is in the UI. Weight was v1's
+dominant goal, so this probably wants a home — it is a UI addition with no
+migration whenever it earns one.

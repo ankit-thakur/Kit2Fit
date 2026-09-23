@@ -7,7 +7,16 @@
  */
 import type { WeekPledgeResult, WeekScore } from './types';
 
-/** Default ceiling on a member's total weekly commitments (R8). */
+/**
+ * The cap members are shown (R8). Three bounds the screen and the cognitive
+ * load; the commitment ceiling below is the quiet backstop against dilution.
+ *
+ * Neither cap touches how adherence is computed — R2 still pools across
+ * whatever pledges a member holds.
+ */
+export const MAX_PLEDGES_PER_MEMBER = 3;
+
+/** Ceiling on a member's total weekly commitments (R8). */
 export const DEFAULT_COMMITMENT_CAP = 14;
 
 export const MIN_TARGET_PER_WEEK = 1;
@@ -90,6 +99,13 @@ export function computeWeek(pledges: PledgeTarget[], tallies: PledgeTally[]): We
 /** Total weekly commitments a set of pledges adds up to (R8). */
 export function totalWeeklyCommitments(pledges: PledgeTarget[]): number {
   return pledges.reduce((sum, p) => sum + Math.max(0, p.targetPerWeek), 0);
+}
+
+export function exceedsPledgeCap(
+  pledgeCount: number,
+  max: number = MAX_PLEDGES_PER_MEMBER,
+): boolean {
+  return pledgeCount > max;
 }
 
 export function exceedsCommitmentCap(

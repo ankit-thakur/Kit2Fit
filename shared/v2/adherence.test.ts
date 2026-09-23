@@ -6,6 +6,7 @@ import {
   adherenceAcross,
   totalWeeklyCommitments,
   exceedsCommitmentCap,
+  exceedsPledgeCap,
   isValidTarget,
   type PledgeTarget,
 } from './adherence';
@@ -234,5 +235,41 @@ describe('worked example from the spec', () => {
     expect(dana.adherencePct).toBe(100);
     expect(sam.fullWeek).toBe(true);
     expect(dana.fullWeek).toBe(true);
+  });
+});
+
+describe('R8 — three pledges, under a commitment ceiling', () => {
+  it('caps the pledge count at three', () => {
+    expect(exceedsPledgeCap(3)).toBe(false);
+    expect(exceedsPledgeCap(4)).toBe(true);
+  });
+
+  it('still catches dilution inside three slots', () => {
+    // "drink water 7x" as a third pledge, padding the denominator with
+    // something never missed.
+    const padded = [strength, eating, { pledgeId: 'water', targetPerWeek: 7 }];
+    expect(exceedsPledgeCap(padded.length)).toBe(false);
+    expect(exceedsCommitmentCap(padded)).toBe(true);
+  });
+
+  it('leaves adherence untouched by either cap', () => {
+    const three = computeWeek(
+      [
+        { pledgeId: 'a', targetPerWeek: 2 },
+        { pledgeId: 'b', targetPerWeek: 2 },
+        { pledgeId: 'c', targetPerWeek: 2 },
+      ],
+      [
+        { pledgeId: 'a', completed: 1 },
+        { pledgeId: 'b', completed: 1 },
+        { pledgeId: 'c', completed: 1 },
+      ],
+    );
+    const one = computeWeek(
+      [{ pledgeId: 'a', targetPerWeek: 6 }],
+      [{ pledgeId: 'a', completed: 3 }],
+    );
+    expect(three.adherencePct).toBe(50);
+    expect(one.adherencePct).toBe(50);
   });
 });

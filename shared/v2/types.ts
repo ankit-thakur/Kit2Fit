@@ -40,9 +40,6 @@ export interface GroupMembership {
   onboardedAt?: string;
 }
 
-/** What a pledge tracks alongside its completions. Tracked, never scored. */
-export type MetricKind = 'weight' | 'reps' | 'lift' | 'none';
-
 export interface Pledge {
   groupId: string;
   userId: string;
@@ -51,35 +48,70 @@ export interface Pledge {
   label: string;
   /** 1-7. A "daily" pledge is simply 7 (spec R1). */
   targetPerWeek: number;
-  metricKind: MetricKind;
+  /**
+   * Names the one optional number this pledge captures — "Bench", "Sleep".
+   * Freeform rather than an enum of kinds: a fixed vocabulary is what made v1's
+   * goalCategory fail. Tracked, never scored.
+   */
+  metricLabel?: string;
+  metricUnit?: string;
+  /**
+   * Week this version of the pledge takes effect (R9). Edits apply from next
+   * week, so a target can be corrected but never lowered to rescue the week
+   * currently in progress.
+   */
+  effectiveFrom: string;
   createdAt: string;
-  /** Set when the challenge starts; a locked pledge can no longer be edited (R9). */
-  lockedAt?: string;
 }
 
 /**
- * Optional context attached to a completion. Recorded for the member's own
- * charts and their tile on the group board.
+ * A completion. Everything optional on it is recorded and displayed but never
+ * scored: ninety minutes and twenty minutes are both exactly one completion.
  *
- * This never affects adherence. Ninety minutes and twenty minutes are both
- * exactly one completion — relaxing that is how v1 ended up with volume
- * dominating the score (docs/v2-spec.md §4).
+ * There is deliberately no `minutes` field. Duration is a metric like any other
+ * if a member cares about it — making it first-class is how v1 ended up scoring
+ * volume (docs/v2-spec.md §4).
  */
-export interface CompletionDetail {
-  minutes?: number;
-  note?: string;
-  metricValue?: number;
-}
-
 export interface Completion {
   groupId: string;
   userId: string;
   pledgeId: string;
-  /** Local calendar date, YYYY-MM-DD. */
+  /** Local calendar date in the group's time zone, YYYY-MM-DD. */
   date: string;
-  detail?: CompletionDetail;
+  /** A few words, shown on the member's tile — "Bench day". */
+  title?: string;
+  /** Longer, for the member's own record. */
+  note?: string;
   photoKey?: string;
   createdAt: string;
+}
+
+/**
+ * A named number recorded on a date.
+ *
+ * With `pledgeId` it is captured when that pledge is completed; without one it
+ * is a day metric such as weight, recordable on a rest day. Hanging metrics off
+ * completions alone would make the series gappy on exactly the days people weigh
+ * in — v1's jagged-graph problem in a new costume.
+ */
+export interface MetricEntry {
+  groupId: string;
+  userId: string;
+  date: string;
+  /** Stable key derived from the pledge's metricLabel, or a day metric's name. */
+  metricKey: string;
+  value: number;
+  pledgeId?: string;
+}
+
+/** One per device, not per user: a member may install on phone and desktop. */
+export interface PushSubscription {
+  userId: string;
+  subscriptionId: string;
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+  createdAt: string;
+  lastSeenAt: string;
 }
 
 /** One pledge's outcome for a single week. */
